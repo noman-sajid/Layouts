@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+    <link rel="stylesheet" href="style.css">
+
+
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="logo">MyLogo</a>
+        <ul class="nav-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+        <div class="hamburger">
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      </nav>
+    
+    
+       <!-- Hero Section -->
+      <section class="hero" aria-label="Hero carousel section">
+        <!-- Dark Overlay -->
+        <div class="overlay"></div>
+    
+        <!-- Carousel -->
+        <div class="carousel" aria-live="polite">
+          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="Image 1" class="active">
+          <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="Image 2">
+          <img src="https://images.unsplash.com/photo-1499678329028-101435549a4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="Image 3">
+        </div>
+    
+        <!-- Glassy Card -->
+        <div class="glass-card">
+          <h1 id="carousel-title">Explore the World</h1>
+          <p id="carousel-description">Embark on a journey of discovery and adventure. Let us guide you through extraordinary experiences.</p>
+          <div class="buttons-container">
+            <a href="#" class="btn">Get Started</a>
+            <a href="#" class="btn secondary">Learn More</a>
+          </div>
+        </div>
+    
+        <!-- Arrow Navigation -->
+        <div class="arrow-nav">
+          <button class="arrow-btn prev" aria-label="Previous slide">
+            <svg viewBox="0 0 24 24">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+          </button>
+          <button class="arrow-btn next" aria-label="Next slide">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 18l6-6-6-6"></path>
+            </svg>
+          </button>
+        </div>
+    
+        <!-- Carousel Navigation Buttons -->
+        <div class="carousel-nav" role="tablist">
+          <button class="nav-btn active" data-index="0" role="tab" aria-selected="true" aria-label="Slide 1"></button>
+          <button class="nav-btn" data-index="1" role="tab" aria-selected="false" aria-label="Slide 2"></button>
+          <button class="nav-btn" data-index="2" role="tab" aria-selected="false" aria-label="Slide 3"></button>
+        </div>
+    
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
+      </section>
+      <script src="index.js"></script>
+</body>
+</html>
