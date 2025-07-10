@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habitium - Your Habit Journey</title>
+    <!-- Tailwind CSS CDN for utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Poppins (headlines) and Inter (body text) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS variables for the defined color scheme */
+        :root {
+            --primary: #f59e0b; /* amber-500 */
+            --accent: #fcd34d; /* amber-300 */
+            --neutral-bg: #f5f5f4; /* stone-100 for light mode background */
+            --dark-bg: #1c1917; /* stone-900 for dark mode background */
+            --danger: #ef4444; /* red-500 for the logo dot */
+            --light-shadow: rgba(0, 0, 0, 0.1); /* Subtle shadow for light mode */
+            --dark-shadow: rgba(255, 255, 255, 0.05); /* Subtle shadow for dark mode */
+        }
+
+        /* Apply custom properties to Tailwind's utility classes for easy use */
+        .bg-primary { background-color: var(--primary); }
+        .bg-accent { background-color: var(--accent); }
+        .bg-neutral-bg { background-color: var(--neutral-bg); }
+        .bg-dark-bg { background-color: var(--dark-bg); }
+        .bg-danger { background-color: var(--danger); }
+
+        .text-primary { color: var(--primary); }
+        .text-accent { color: var(--accent); }
+        .text-neutral-bg { color: var(--neutral-bg); }
+        .text-dark-bg { color: var(--dark-bg); }
+        .text-danger { color: var(--danger); }
+
+        .shadow-light { box-shadow: var(--light-shadow); }
+        .shadow-dark { box-shadow: var(--dark-shadow); }
+
+        /* Custom button styling for both light and dark modes */
+        /* Applied to buttons with class 'btn-custom' */
+        .btn-custom {
+            background-color: #eab308; /* amber-400 */
+            color: #1c1917; /* stone-900 */
+        }
+        .btn-custom:hover {
+            background-color: #f59e0b; /* amber-500 */
+        }
+
+        /* Font family definitions */
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+
+        /* Dark mode specific styles */
+        /* When 'dark' class is applied to html, adjust overall background and default text color */
+        html.dark {
+            background-color: var(--dark-bg);
+            color: var(--neutral-bg); /* Light text color for dark mode */
+        }
+
+        /* Adjust specific text colors for visibility in dark mode */
+        html.dark .text-stone-900 {
+            color: var(--neutral-bg); /* Ensures headline is light in dark mode */
+        }
+        html.dark .text-gray-700 {
+            color: var(--neutral-bg); /* Ensures subheadline is light in dark mode */
+        }
+        html.dark .text-gray-800 {
+             color: var(--neutral-bg); /* Ensures text on dark toggle is light */
+        }
+
+
+        /* Adjust background colors for elements in dark mode */
+        html.dark .bg-neutral-bg {
+            background-color: var(--dark-bg);
+        }
+        html.dark .bg-gray-200 { /* For the dark mode toggle button background */
+            background-color: #333; /* Darker gray for contrast */
+        }
+
+
+        /* Apply dark mode shadow */
+        html.dark .shadow-light {
+            box-shadow: var(--dark-shadow);
+        }
+
+        /* Dark mode button styling - ensures consistency */
+        html.dark .btn-custom {
+            background-color: #eab308; /* amber-400 */
+            color: #1c1917; /* stone-900 */
+        }
+        html.dark .btn-custom:hover {
+            background-color: #f59e0b; /* amber-500 */
+        }
+
+        /* Ensure card backgrounds adapt in dark mode */
+        html.dark .bg-white {
+            background-color: #2c2927; /* Slightly lighter dark background for cards */
+        }
+    </style>
+</head>
+<body class="bg-neutral-bg text-stone-900 min-h-screen flex flex-col font-inter transition-colors duration-300">
+
+    <!-- Navbar Section: Sticky, minimal, with logo and navigation links -->
+    <nav class="w-full bg-neutral-bg dark:bg-dark-bg shadow-light dark:shadow-dark py-4 px-6 md:px-12 flex justify-between items-center rounded-b-lg sticky top-0 z-10">
+        <!-- Logo: "Hb." with a distinctive red dot -->
+        <div class="text-2xl font-bold font-poppins flex items-center">
+            Hb.<span class="w-2 h-2 bg-danger rounded-full ml-1"></span>
+        </div>
+
+        <!-- Navigation Links/Buttons: Login and Register -->
+        <div class="flex items-center space-x-4">
+            <button class="btn-custom px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-sm">Login</button>
+            <button class="btn-custom px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-sm">Register</button>
+            <!-- Dark Mode Toggle Button with Sun/Moon icons -->
+            <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <!-- Moon icon (initially hidden, shown in light mode to suggest switching to dark) -->
+                <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                <!-- Sun icon (initially visible, shown in dark mode to suggest switching to light) -->
+                <svg id="sun-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12H2m8.003-7.5l-.707-.707M16.707 17.707l.707.707M3.75 4.75l.707.707M17.25 19.25l.707.707M5.636 18.364l-.707.707M18.364 5.636l.707-.707"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section: Full-screen, vertically centered content -->
+    <header class="flex-grow flex items-center justify-center py-16 px-6 md:px-12 bg-neutral-bg dark:bg-dark-bg transition-colors duration-300 min-h-screen pt-20">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between max-w-6xl">
+            <!-- Left Content: Hero message and CTA Button -->
+            <div class="flex-1 text-center md:text-left mb-10 md:mb-0 md:mr-12">
+                <h1 class="text-5xl md:text-6xl font-extrabold font-poppins leading-tight mb-6 text-stone-900 dark:text-neutral-bg">
+                    Your habit journey begins here.
+                </h1>
+                <button class="btn-custom px-8 py-4 rounded-xl text-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-md">
+                    Get Started
+                </button>
+            </div>
+
+            <!-- Right Side: Large friendly illustration -->
+            <div class="flex-1 flex justify-center md:justify-end">
+                <!-- Placeholder image for the illustration. Consider replacing with a custom SVG or image. -->
+                <img src="https://placehold.co/450x450/fcd34d/1c1917?text=Productivity+Illustration" alt="Productivity Illustration" class="w-full max-w-sm md:max-w-md rounded-xl shadow-lg">
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section: 3 feature cards -->
+    <section class="py-16 px-6 md:px-12 bg-neutral-bg dark:bg-dark-bg transition-colors duration-300">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold font-poppins text-center mb-12 text-stone-900 dark:text-neutral-bg">
+                Key Features
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature Card 1: Track Progress -->
+                <div class="bg-white dark:bg-[#2c2927] rounded-xl p-8 shadow-light dark:shadow-dark text-center">
+                    <div class="text-primary mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold font-poppins mb-3 text-stone-900 dark:text-neutral-bg">Track Progress</h3>
+                    <p class="text-gray-700 dark:text-neutral-bg font-inter">Monitor your daily habits and see your progress over time with intuitive charts.</p>
+                </div>
+
+                <!-- Feature Card 2: Earn Streaks -->
+                <div class="bg-white dark:bg-[#2c2927] rounded-xl p-8 shadow-light dark:shadow-dark text-center">
+                    <div class="text-primary mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold font-poppins mb-3 text-stone-900 dark:text-neutral-bg">Earn Streaks</h3>
+                    <p class="text-gray-700 dark:text-neutral-bg font-inter">Stay motivated by building and maintaining impressive habit streaks and achievements.</p>
+                </div>
+
+                <!-- Feature Card 3: Set Smart Goals -->
+                <div class="bg-white dark:bg-[#2c2927] rounded-xl p-8 shadow-light dark:shadow-dark text-center">
+                    <div class="text-primary mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M17 16l-4-4-4 4"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold font-poppins mb-3 text-stone-900 dark:text-neutral-bg">Set Smart Goals</h3>
+                    <p class="text-gray-700 dark:text-neutral-bg font-inter">Define clear, achievable goals and break them down into manageable daily habits.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // JavaScript for Dark Mode Toggle functionality
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const htmlElement = document.documentElement; // Get the root HTML element
+
+        // Function to set the theme based on the provided 'theme' string ('light' or 'dark')
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark'); // Save preference to local storage
+                moonIcon.classList.remove('hidden'); // Show moon icon
+                sunIcon.classList.add('hidden');     // Hide sun icon
+            } else {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light'); // Save preference to local storage
+                sunIcon.classList.remove('hidden'); // Show sun icon
+                moonIcon.classList.add('hidden');     // Hide moon icon
+            }
+        }
+
+        // On page load, check for saved theme preference in local storage
+        // If no preference, check system's preferred color scheme
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme('dark'); // Apply dark theme
+        } else {
+            setTheme('light'); // Apply light theme
+        }
+
+        // Add event listener to the theme toggle button
+        themeToggleBtn.addEventListener('click', () => {
+            // Toggle theme based on current state
+            if (htmlElement.classList.contains('dark')) {
+                setTheme('light'); // If currently dark, switch to light
+            } else {
+                setTheme('dark'); // If currently light, switch to dark
+            }
+        });
+    </script>
+</body>
+</html>
