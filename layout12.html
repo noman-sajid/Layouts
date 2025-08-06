@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hibo's Habit Journey - Cinematic Scroll</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --stone: #D6CCC2;
+            --amber: #FFB300;
+            --amber-light: #FFD54F;
+            --burnout: #F0EDEB;
+            --giving-up: #E6E1DF;
+            --secret: #FBE8C6;
+            --success: #FFC107;
+            --text-dark: #403d39;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--stone);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .story-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .panel {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .panel h2 {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 700;
+            max-width: 1200px;
+            line-height: 1.2;
+            z-index: 2;
+        }
+        
+        /* Word animation setup */
+        .word {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+        }
+
+        .word-inner {
+            display: inline-block;
+            transform: translateY(100%);
+        }
+
+        .illustration {
+            font-size: clamp(6rem, 20vw, 12rem);
+            position: absolute;
+            z-index: 1;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        #cta-button {
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            background-color: #fff;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            display: inline-block;
+            z-index: 2;
+        }
+
+        #cta-button.glow {
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--amber), 0 0 30px var(--amber); }
+            50% { box-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 40px var(--amber), 0 0 50px var(--amber); }
+            100% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--amber), 0 0 30px var(--amber); }
+        }
+
+        #cta-button:hover {
+            transform: translateY(15px) scale(1.05);
+        }
+
+        /* Scroll guide */
+        #scroll-guide {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            color: #403d39;
+            opacity: 0.8;
+            animation: bounce 1.5s infinite;
+            z-index: 5;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Skip button */
+        #skip-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fff;
+            color: var(--text-dark);
+            border: none;
+            border-radius: 30px;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: background 0.3s ease;
+            z-index: 10;
+        }
+        #skip-button:hover {
+            background: var(--amber);
+            color: #fff;
+        }
+
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 15px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Indicator -->
+    <div id="scroll-guide">↓ Scroll to continue ↓</div>
+
+    <!-- Skip Button -->
+    <button id="skip-button">Cut the crap 😂</button>
+
+    <main class="story-wrapper">
+        <section class="panel" data-bg="var(--stone)">
+            <div class="illustration">👋</div>
+            <h2>Meet Hibo.</h2>
+        </section>
+        <section class="panel" data-bg="var(--amber)">
+            <div class="illustration">🚀</div>
+            <h2>Today, Hibo decides to change everything!</h2>
+        </section>
+        <section class="panel" data-bg="var(--amber-light)">
+            <div class="illustration">🏋️‍♂️</div>
+            <h2>He pushes hard for a week…</h2>
+        </section>
+        <section class="panel" data-bg="var(--burnout)">
+            <div class="illustration">😩</div>
+            <h2>But motivation fades.</h2>
+        </section>
+        <section class="panel" data-bg="var(--giving-up)">
+            <div class="illustration">🛑</div>
+            <h2>Everything stops again.</h2>
+        </section>
+        <section class="panel" data-bg="var(--secret)">
+            <div class="illustration">💡</div>
+            <h2>Until he finds the secret.</h2>
+        </section>
+        <section class="panel" data-bg="var(--amber)">
+            <div class="illustration">🤫</div>
+            <h2>Small steps. Consistency. Not motivation.</h2>
+        </section>
+        <section class="panel" data-bg="var(--success)">
+            <div class="illustration">🏆</div>
+            <h2>Now, Hibo builds habits for life.</h2>
+            <a href="#" id="cta-button">Start Your Journey</a>
+        </section>
+    </main>
+
+    <div id="confetti-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- Text Splitting ---
+            function splitText(selector) {
+                document.querySelectorAll(selector).forEach(el => {
+                    if (!el.querySelector('#cta-button')) {
+                         el.innerHTML = el.innerText.split(/\s+/).map(word => 
+                            `<span class="word"><span class="word-inner">${word}</span></span>`
+                        ).join(' ');
+                    }
+                });
+            }
+            splitText('.panel h2');
+
+            const panels = document.querySelectorAll('.panel');
+
+            // Scroll Guide Hide on First Panel Exit
+            ScrollTrigger.create({
+                trigger: panels[0],
+                start: "bottom top",
+                onEnter: () => gsap.to("#scroll-guide", { opacity: 0, duration: 0.5 }),
+                onLeaveBack: () => gsap.to("#scroll-guide", { opacity: 1, duration: 0.5 })
+            });
+
+            // Show Skip Button
+            gsap.to("#skip-button", {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                delay: 1,
+                ease: "power2.out"
+            });
+
+            // Skip Button Functionality
+            document.getElementById('skip-button').addEventListener('click', () => {
+                const lastPanel = panels[panels.length - 1];
+                window.scrollTo({
+                    top: lastPanel.offsetTop,
+                    behavior: "smooth"
+                });
+            });
+
+            // Panel Animations
+            panels.forEach((panel, i) => {
+                const illustration = panel.querySelector('.illustration');
+                const words = panel.querySelectorAll('.word-inner');
+                const cta = panel.querySelector('#cta-button');
+
+                let tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: panel,
+                        start: "top top",
+                        end: "+=200%",
+                        scrub: 1,
+                        pin: true,
+                        pinSpacing: true,
+                    }
+                });
+
+                tl.to('body', { backgroundColor: panel.dataset.bg, duration: 0.25, ease: 'sine.inOut' }, 0);
+
+                tl.fromTo(illustration, 
+                    { opacity: 0, scale: 0.5, y: '50%' },
+                    { opacity: 0.8, scale: 1, y: '0%', ease: 'back.out(1.7)', duration: 1 }, 0.2);
+
+                tl.fromTo(words, 
+                    { y: '100%' },
+                    { y: '0%', duration: 1, stagger: 0.1, ease: 'power2.out' }, 0.5);
+
+                // Add cinematic blur & scale effect
+              // Subtle parallax and cinematic feel (no full-screen blur)
+gsap.to(illustration, {
+    scale: 1.2,
+    rotation: 5,
+    scrollTrigger: {
+        trigger: panel,
+        start: "top center",
+        end: "bottom center",
+        scrub: true
+    }
+});
+
+gsap.fromTo(words,
+    { opacity: 1, letterSpacing: "0em" },
+    {
+        opacity: 1,
+        letterSpacing: "0.2em",
+        scrollTrigger: {
+            trigger: panel,
+            start: "top center",
+            end: "bottom center",
+            scrub: true
+        }
+    }
+);
+
+                // Add parallax to illustration
+                gsap.to(illustration, {
+                    yPercent: 10,
+                    scrollTrigger: {
+                        trigger: panel,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: true
+                    }
+                });
+
+                tl.to([illustration, words], { opacity: 0, duration: 0.5 }, '+=1');
+
+                if (i === panels.length - 1 && cta) {
+                    const fadeInTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: "top top",
+                            end: "+=200%",
+                            scrub: 1,
+                        }
+                    });
+
+                    fadeInTl.fromTo(cta, {
+                        opacity: 0,
+                        y: 20
+                    }, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 1,
+                        ease: 'power2.out',
+                        onStart: () => {
+                            ScrollTrigger.create({
+                                trigger: panel,
+                                start: "center center",
+                                onEnter: () => {
+                                    if(!cta.classList.contains('glow-started')) {
+                                        cta.classList.add('glow', 'glow-started');
+                                        launchConfetti();
+                                    }
+                                },
+                            });
+                        }
+                    }, '+=1.5');
+                }
+            });
+
+            // Confetti Function
+            function launchConfetti() {
+                const container = document.getElementById('confetti-container');
+                const confettiCount = 200;
+                const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4', '#FFFFFF'];
+
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.top = `${-20}%`;
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(confetti);
+
+                    gsap.to(confetti, {
+                        y: '120vh',
+                        x: `random(-200, 200)`,
+                        rotation: `random(360, 720)`,
+                        scale: `random(0.5, 1.5)`,
+                        opacity: 1,
+                        duration: `random(3, 6)`,
+                        ease: 'power1.out',
+                        delay: Math.random() * 2,
+                        onComplete: () => confetti.remove()
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
