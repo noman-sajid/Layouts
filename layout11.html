@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hibo's Habit Journey - Cinematic Scroll</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --stone: #D6CCC2;
+            --amber: #FFB300;
+            --amber-light: #FFD54F;
+            --burnout: #F0EDEB;
+            --giving-up: #E6E1DF;
+            --secret: #FBE8C6;
+            --success: #FFC107;
+            --text-dark: #403d39;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--stone);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .story-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .panel {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .panel h2 {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 700;
+            max-width: 1200px;
+            line-height: 1.2;
+            z-index: 2;
+        }
+        
+        /* Word animation setup */
+        .word {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+        }
+
+        .word-inner {
+            display: inline-block;
+            transform: translateY(100%);
+        }
+
+        .illustration {
+            font-size: clamp(6rem, 20vw, 12rem);
+            position: absolute;
+            z-index: 1;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        #cta-button {
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            background-color: #fff;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            display: inline-block; /* Needed for transform */
+            z-index: 2;
+        }
+
+        #cta-button.glow {
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--amber), 0 0 30px var(--amber); }
+            50% { box-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 40px var(--amber), 0 0 50px var(--amber); }
+            100% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--amber), 0 0 30px var(--amber); }
+        }
+
+        #cta-button:hover {
+            transform: translateY(15px) scale(1.05);
+        }
+
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 15px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="story-wrapper">
+        <section class="panel" data-bg="var(--stone)">
+            <div class="illustration">👋</div>
+            <h2>Meet Hibo.</h2>
+        </section>
+        <section class="panel" data-bg="var(--amber)">
+            <div class="illustration">🚀</div>
+            <h2>Today, Hibo decides to change everything!</h2>
+        </section>
+        <section class="panel" data-bg="var(--amber-light)">
+            <div class="illustration">🏋️‍♂️</div>
+            <h2>He pushes hard for a week…</h2>
+        </section>
+        <section class="panel" data-bg="var(--burnout)">
+            <div class="illustration">😩</div>
+            <h2>But motivation fades.</h2>
+        </section>
+        <section class="panel" data-bg="var(--giving-up)">
+            <div class="illustration">🛑</div>
+            <h2>Everything stops again.</h2>
+        </section>
+        <section class="panel" data-bg="var(--secret)">
+            <div class="illustration">💡</div>
+            <h2>Until he finds the secret.</h2>
+        </section>
+        <section class="panel" data-bg="var(--amber)">
+            <div class="illustration">🤫</div>
+            <h2>Small steps. Consistency. Not motivation.</h2>
+        </section>
+        <section class="panel" data-bg="var(--success)">
+            <div class="illustration">🏆</div>
+            <h2>Now, Hibo builds habits for life.</h2>
+            <a href="#" id="cta-button">Start Your Journey</a>
+        </section>
+    </main>
+
+    <div id="confetti-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- Text Splitting ---
+            function splitText(selector) {
+                document.querySelectorAll(selector).forEach(el => {
+                    // Only split if it doesn't contain the CTA button
+                    if (!el.querySelector('#cta-button')) {
+                         el.innerHTML = el.innerText.split(/\s+/).map(word => 
+                            `<span class="word"><span class="word-inner">${word}</span></span>`
+                        ).join(' ');
+                    }
+                });
+            }
+            splitText('.panel h2');
+
+            // --- Main Animation Logic ---
+            const panels = document.querySelectorAll('.panel');
+            
+            panels.forEach((panel, i) => {
+                const illustration = panel.querySelector('.illustration');
+                const words = panel.querySelectorAll('.word-inner');
+                const cta = panel.querySelector('#cta-button');
+
+                // Create a timeline for this panel's animations
+                let tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: panel,
+                        start: "top top",
+                        end: "+=200%", // Gives 200% of viewport height for animation
+                        scrub: 1,
+                        pin: true,
+                        pinSpacing: true,
+                    }
+                });
+                
+                // Animate background color
+                tl.to('body', {
+                    backgroundColor: panel.dataset.bg,
+                    duration: 0.25,
+                    ease: 'sine.inOut'
+                }, 0);
+
+                // Animate illustration
+                tl.fromTo(illustration, 
+                    { opacity: 0, scale: 0.5, y: '50%' },
+                    { 
+                        opacity: 0.8, 
+                        scale: 1, 
+                        y: '0%', 
+                        ease: 'back.out(1.7)', 
+                        duration: 1
+                    }, 0.2);
+                
+                // Animate words
+                tl.fromTo(words, 
+                    { y: '100%' },
+                    { 
+                        y: '0%', 
+                        duration: 1,
+                        stagger: 0.1,
+                        ease: 'power2.out'
+                    }, 0.5);
+
+                // Fade out elements before unpinning
+                // Check if cta exists in this panel to avoid errors
+                const elementsToFade = cta ? [illustration, words, cta] : [illustration, words];
+                tl.to(elementsToFade, {
+                    opacity: 0,
+                    duration: 0.5
+                }, '+=1'); // Add time after main animations
+
+                // Special animations for the last panel
+                if (i === panels.length - 1 && cta) {
+                    // Animate CTA in separately from the fade out
+                    const fadeInTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: "top top",
+                            end: "+=200%",
+                            scrub: 1,
+                        }
+                    });
+
+                    fadeInTl.fromTo(cta, {
+                        opacity: 0,
+                        y: 20
+                    }, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 1,
+                        ease: 'power2.out',
+                        onStart: () => {
+                            // Use onStart of the tween itself to ensure cta exists
+                            ScrollTrigger.create({
+                                trigger: panel,
+                                start: "center center", // Trigger confetti when panel is centered
+                                onEnter: () => {
+                                    if(!cta.classList.contains('glow-started')) {
+                                        cta.classList.add('glow', 'glow-started');
+                                        launchConfetti();
+                                    }
+                                },
+                            });
+                        }
+                    }, '+=1.5');
+                }
+            });
+
+            // --- Confetti ---
+            function launchConfetti() {
+                const container = document.getElementById('confetti-container');
+                if (!container) return;
+                const confettiCount = 200;
+                const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4', '#FFFFFF'];
+
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.top = `${-20}%`;
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(confetti);
+
+                    gsap.to(confetti, {
+                        y: '120vh',
+                        x: `random(-200, 200)`,
+                        rotation: `random(360, 720)`,
+                        scale: `random(0.5, 1.5)`,
+                        opacity: 1,
+                        duration: `random(3, 6)`,
+                        ease: 'power1.out',
+                        delay: Math.random() * 2,
+                        onComplete: () => confetti.remove()
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
