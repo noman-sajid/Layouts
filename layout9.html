@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hibo's Journey - Habitium Story</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      overflow: hidden;
+      background: #D6CCC2;
+      color: #333;
+    }
+    .story-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .story-step {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    .active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .illustration {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    .navigation {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      gap: 15px;
+    }
+    .btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: #6C584C;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn:hover:enabled {
+      background: #4b3c33;
+    }
+    .cta-btn {
+      background: #FFB300;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="story-container">
+    <!-- Steps -->
+    <div class="story-step active" data-bg="#D6CCC2">
+      <div class="illustration">😴</div>
+      <div>Meet Hibo.</div>
+    </div>
+    <div class="story-step" data-bg="#FFB300">
+      <div class="illustration">💡</div>
+      <div>Today, Hibo decides to change everything!</div>
+    </div>
+    <div class="story-step" data-bg="linear-gradient(135deg, #FFB300, #FFD54F)">
+      <div class="illustration">🏋️</div>
+      <div>He pushes hard for a week…</div>
+    </div>
+    <div class="story-step" data-bg="#F0EDEB">
+      <div class="illustration">😓</div>
+      <div>But motivation fades.</div>
+    </div>
+    <div class="story-step" data-bg="#E6E1DF">
+      <div class="illustration">😞</div>
+      <div>Everything stops again.</div>
+    </div>
+    <div class="story-step" data-bg="linear-gradient(135deg, #FFB300, #FFA000)">
+      <div class="illustration">📱</div>
+      <div>Until he finds Habitium.</div>
+    </div>
+    <div class="story-step" data-bg="#FBE8C6">
+      <div class="illustration">🌱</div>
+      <div>The secret? Small steps. Consistency. Not motivation.</div>
+    </div>
+    <div class="story-step" data-bg="#FFD54F">
+      <div class="illustration">🎉</div>
+      <div>Now, Hibo builds habits for life.</div>
+      <button class="btn cta-btn" onclick="alert('Start your journey!')">Start Your Journey</button>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <button id="prev" class="btn" disabled>Previous</button>
+      <button id="next" class="btn">Next</button>
+    </div>
+  </div>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+    const steps = document.querySelectorAll('.story-step');
+    const body = document.body;
+    let current = 0;
+
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+
+    function updateButtons() {
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === steps.length - 1;
+    }
+
+    function showStep(index) {
+      const currentStep = steps[current];
+      const nextStep = steps[index];
+
+      gsap.to(currentStep, { opacity: 0, scale: 0.95, duration: 0.6, onComplete: () => {
+        currentStep.classList.remove('active');
+        nextStep.classList.add('active');
+        body.style.background = nextStep.dataset.bg;
+        gsap.fromTo(nextStep, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.8 });
+        current = index;
+        updateButtons();
+      }});
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (current < steps.length - 1) showStep(current + 1);
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (current > 0) showStep(current - 1);
+    });
+
+    updateButtons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CSS/JS Demo Capsule</title>
+<style>
+  /* ---------- RESET ---------- */
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+
+  /* ---------- BODY & PARALLAX ---------- */
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at top,#111 0%,#000 100%);
+    perspective:1000px;
+    overflow:hidden;
+  }
+
+  /* ---------- NEON TEXT ---------- */
+  .title{
+    position:absolute;
+    top:40px;
+    font-size:2.5rem;
+    color:#00ffc8;
+    text-shadow:
+      0 0 5px #00ffc8,
+      0 0 10px #00ffc8,
+      0 0 20px #00ffc8,
+      0 0 40px #00ffc8;
+    animation:pulse 2s ease-in-out infinite alternate;
+  }
+  @keyframes pulse{
+    from{text-shadow:0 0 5px #00ffc8,0 0 10px #00ffc8,0 0 20px #00ffc8;}
+    to  {text-shadow:0 0 10px #00ffc8,0 0 20px #00ffc8,0 0 40px #00ffc8;}
+  }
+
+  /* ---------- CARD GRID ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:30px;
+    width:90%;
+    max-width:1000px;
+    transform-style:preserve-3d;
+  }
+  .card{
+    position:relative;
+    height:220px;
+    background:linear-gradient(145deg,#1e1e1e,#121212);
+    border-radius:12px;
+    box-shadow:0 8px 30px rgba(0,255,200,.15);
+    transition:transform .3s ease, box-shadow .3s ease;
+    cursor:pointer;
+  }
+  .card:hover{
+    transform:translateY(-8px) rotateX(5deg) rotateY(-5deg);
+    box-shadow:0 12px 40px rgba(0,255,200,.35);
+  }
+
+  /* ---------- CARD CONTENT ---------- */
+  .card::before{
+    content:attr(data-label);
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-size:1.4rem;
+    color:#00ffc8;
+    text-transform:uppercase;
+    letter-spacing:2px;
+  }
+
+  /* ---------- GLITCH CLASS ---------- */
+  @keyframes glitch{
+    0%   {transform:translate(0);}
+    20%  {transform:translate(-3px,3px);}
+    40%  {transform:translate(3px,-3px);}
+    60%  {transform:translate(-3px,-3px);}
+    80%  {transform:translate(3px,3px);}
+    100% {transform:translate(0);}
+  }
+  .glitch{
+    animation:glitch .25s linear infinite;
+    color:#ff0040;
+    box-shadow:0 0 15px #ff0040;
+  }
+</style>
+</head>
+<body>
+
+  <h1 class="title">CSS & JS Micro-Demo</h1>
+
+  <div class="grid">
+    <div class="card" data-label="Card 1"></div>
+    <div class="card" data-label="Card 2"></div>
+    <div class="card" data-label="Card 3"></div>
+    <div class="card" data-label="Card 4"></div>
+  </div>
+
+<script>
+  // Simple click-to-glitch effect
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      card.classList.toggle('glitch');
+      // stop glitch after 1.2 s
+      setTimeout(()=>card.classList.remove('glitch'),1200);
+    });
+  });
+</script>
+
+</body>
+</html>

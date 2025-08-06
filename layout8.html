@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow - Track Your Habits</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --amber-500: #f59e0b;
+            --amber-400: #fbbf24;
+            --amber-100: #fef3c7;
+            --stone-50: #fafaf9;
+            --stone-100: #f5f5f4;
+            --stone-200: #e7e5e4;
+            --stone-300: #d6d3d1;
+            --stone-400: #a8a29e;
+            --stone-500: #78716c;
+            --stone-700: #44403c;
+            --stone-900: #1c1917;
+            
+            --bg-primary: var(--stone-50);
+            --bg-secondary: white;
+            --text-primary: var(--stone-900);
+            --text-secondary: var(--stone-700);
+            --border-color: var(--stone-200);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode {
+            --bg-primary: #1c1917;
+            --bg-secondary: #292524;
+            --text-primary: #fafaf9;
+            --text-secondary: #d6d3d1;
+            --border-color: #44403c;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+            padding-top: 64px;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-secondary);
+            box-shadow: var(--shadow);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--amber-500);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            font-size: 1.75rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            transition: transform 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .profile {
+            position: relative;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--amber-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--amber-500);
+            cursor: pointer;
+            border: 2px solid var(--amber-400);
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem 0;
+            width: 200px;
+            display: none;
+            z-index: 10;
+        }
+
+        .dropdown.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--stone-100);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr 350px;
+            }
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--amber-500), var(--amber-400));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-banner h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-banner p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Habit List */
+        .habit-list {
+            background-color: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--amber-500);
+        }
+
+        .habits-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .habit-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background-color: var(--stone-100);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .dark-mode .habit-card {
+            background-color: #3a3634;
+        }
+
+        .habit-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .habit-icon {
+            font-size: 2rem;
+        }
+
+        .habit-info {
+            flex: 1;
+        }
+
+        .habit-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .habit-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .habit-meta .streak {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background-color: var(--amber-100);
+            color: var(--amber-500);
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .dark-mode .habit-meta .streak {
+            background-color: #4d3d17;
+        }
+
+        .habit-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-container {
+            position: relative;
+            width: 24px;
+            height: 24px;
+        }
+
+        .checkbox-container input {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 24px;
+            width: 24px;
+            background-color: var(--stone-200);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .checkmark {
+            background-color: #44403c;
+        }
+
+        .checkmark i {
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: var(--amber-500);
+        }
+
+        .checkbox-container input:checked ~ .checkmark i {
+            opacity: 1;
+        }
+
+        /* Right Column */
+        .progress-section {
+            background-color: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .progress-ring-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--amber-500);
+        }
+
+        .chart-container {
+            background-color: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background-color: var(--stone-100);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .dark-mode .stat-card {
+            background-color: #3a3634;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--amber-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* FAB Button */
+        .fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--amber-500);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            z-index: 90;
+        }
+
+        .fab:hover {
+            background-color: var(--amber-400);
+            transform: scale(1.05) rotate(90deg);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--stone-100);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dark-mode .form-control {
+            background-color: #3a3634;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--amber-500);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background-color: var(--amber-500);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--amber-400);
+        }
+
+        /* Scrollbar styling */
+        .habits-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .habits-container::-webkit-scrollbar-track {
+            background: var(--stone-100);
+            border-radius: 4px;
+        }
+
+        .dark-mode .habits-container::-webkit-scrollbar-track {
+            background: #3a3634;
+        }
+
+        .habits-container::-webkit-scrollbar-thumb {
+            background-color: var(--amber-400);
+            border-radius: 4px;
+        }
+
+        .dark-mode .habits-container::-webkit-scrollbar-thumb {
+            background-color: #785e1c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-water"></i>
+            <span>HabitFlow</span>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="profile">
+                <div class="avatar" id="avatar">JD</div>
+                <div class="dropdown" id="dropdown">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="dashboard">
+            <!-- Left Column -->
+            <div class="left-column">
+                <div class="welcome-banner">
+                    <h1>Hi John 👋 Ready to keep your streak alive?</h1>
+                    <p>You've completed 5 out of 7 habits today. Keep going!</p>
+                </div>
+
+                <div class="habit-list">
+                    <h2 class="section-title"><i class="fas fa-tasks"></i> Your Habits</h2>
+                    <div class="habits-container" id="habitsContainer">
+                        <!-- Habit cards will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <div class="progress-section">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Today's Progress</h2>
+                    <div class="progress-ring-container">
+                        <canvas id="progressRing"></canvas>
+                        <div class="progress-text">71%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h2 class="section-title"><i class="fas fa-chart-bar"></i> Weekly Progress</h2>
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Total Habits</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Completed Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">14</div>
+                        <div class="stat-label">Best Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">87%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Create Habit Modal -->
+    <div class="modal" id="habitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Habit</h3>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="habitForm">
+                <div class="form-group">
+                    <label for="habitName">Habit Name</label>
+                    <input type="text" id="habitName" class="form-control" placeholder="e.g. Drink 8 glasses of water">
+                </div>
+                <div class="form-group">
+                    <label for="habitEmoji">Emoji</label>
+                    <input type="text" id="habitEmoji" class="form-control" placeholder="e.g. 💧" value="💧">
+                </div>
+                <div class="form-group">
+                    <label for="habitFrequency">Frequency</label>
+                    <select id="habitFrequency" class="form-control">
+                        <option>Daily</option>
+                        <option>Weekly</option>
+                        <option>Monthly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="habitTime">Time (Optional)</label>
+                    <input type="time" id="habitTime" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Habit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample habit data
+        const habits = [
+            { id: 1, emoji: '💧', title: 'Drink Water', frequency: 'Daily', time: '8:00 AM', streak: 7, completed: true },
+            { id: 2, emoji: '🏃', title: 'Morning Run', frequency: 'Daily', time: '6:30 AM', streak: 12, completed: false },
+            { id: 3, emoji: '📚', title: 'Read 30 Minutes', frequency: 'Daily', time: '9:00 PM', streak: 5, completed: false },
+            { id: 4, emoji: '🧘', title: 'Meditation', frequency: 'Daily', time: '7:00 AM', streak: 21, completed: true },
+            { id: 5, emoji: '🍎', title: 'Healthy Breakfast', frequency: 'Daily', time: '8:30 AM', streak: 8, completed: true },
+            { id: 6, emoji: '📝', title: 'Journal Writing', frequency: 'Daily', time: '10:00 PM', streak: 3, completed: false },
+            { id: 7, emoji: '🦷', title: 'Floss Teeth', frequency: 'Daily', time: '', streak: 14, completed: false }
+        ];
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const avatar = document.getElementById('avatar');
+        const dropdown = document.getElementById('dropdown');
+        const habitsContainer = document.getElementById('habitsContainer');
+        const fab = document.getElementById('fab');
+        const habitModal = document.getElementById('habitModal');
+        const closeModal = document.getElementById('closeModal');
+        const habitForm = document.getElementById('habitForm');
+
+        // Toggle dark mode
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Toggle profile dropdown
+        avatar.addEventListener('click', () => {
+            dropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!avatar.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Open modal
+        fab.addEventListener('click', () => {
+            habitModal.classList.add('active');
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            habitModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === habitModal) {
+                habitModal.classList.remove('active');
+            }
+        });
+
+        // Handle form submission
+        habitForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('habitName').value;
+            const emoji = document.getElementById('habitEmoji').value;
+            
+            if (name) {
+                // In a real app, you would add the habit to your data store
+                alert(`Habit "${name}" created!`);
+                habitModal.classList.remove('active');
+                habitForm.reset();
+            }
+        });
+
+        // Render habit cards
+        function renderHabits() {
+            habitsContainer.innerHTML = '';
+            
+            habits.forEach(habit => {
+                const habitCard = document.createElement('div');
+                habitCard.className = 'habit-card';
+                habitCard.innerHTML = `
+                    <div class="habit-icon">${habit.emoji}</div>
+                    <div class="habit-info">
+                        <div class="habit-title">${habit.title}</div>
+                        <div class="habit-meta">
+                            <span>${habit.frequency}</span>
+                            ${habit.time ? `<span>•</span><span>${habit.time}</span>` : ''}
+                            <span class="streak"><i class="fas fa-fire"></i> ${habit.streak}</span>
+                        </div>
+                    </div>
+                    <div class="habit-actions">
+                        <label class="checkbox-container">
+                            <input type="checkbox" ${habit.completed ? 'checked' : ''}>
+                            <span class="checkmark"><i class="fas fa-check"></i></span>
+                        </label>
+                    </div>
+                `;
+                
+                habitsContainer.appendChild(habitCard);
+            });
+        }
+
+        // Initialize progress ring
+        function initProgressRing() {
+            const ctx = document.getElementById('progressRing').getContext('2d');
+            const progressRing = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [71, 29],
+                        backgroundColor: [
+                            '#f59e0b',
+                            '#e7e5e4'
+                        ],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize weekly chart
+        function initWeeklyChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Completion %',
+                        data: [80, 60, 90, 70, 85, 95, 71],
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHabits();
+            initProgressRing();
+            initWeeklyChart();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytics – Reward Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amber-50:#fffbeb;--amber-100:#fef3c7;--amber-200:#fde68a;--amber-300:#fcd34d;
+  --amber-400:#fbbf24;--amber-500:#f59e0b;--amber-600:#d97706;
+  --stone-50:#fafaf9;--stone-100:#f5f5f4;--stone-200:#e7e5e4;--stone-300:#d6d3d1;
+  --stone-500:#78716c;--stone-700:#44403c;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:var(--stone-50);color:var(--stone-700);padding:1.5rem}
+h1{font-size:2rem;font-weight:700;text-align:center;margin-bottom:1.5rem}
+.section{
+  background:#fff;border:1px solid var(--stone-200);border-radius:1.5rem;
+  padding:1.5rem;margin-bottom:1.5rem;overflow:hidden;position:relative;
+}
+.section h2{font-size:1.125rem;font-weight:600;margin-bottom:1rem}
+
+/* ---------- Streak Flames (interactive) ---------- */
+.streak-flames{display:flex;justify-content:center;gap:1.25rem}
+.flame-card{
+  width:100px;height:130px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:1rem;background:var(--amber-50);cursor:pointer;
+  transition:transform .3s,background .3s;
+}
+.flame-card:hover{transform:translateY(-4px) scale(1.05);}
+.emoji{font-size:2.5rem;transition:transform .4s}
+.flame-card.burst .emoji{transform:scale(1.5) rotate(15deg)}
+.label{font-size:.75rem;font-weight:600;margin-top:.25rem}
+.counter{font-size:1.25rem;font-weight:700;color:var(--amber-600)}
+
+/* ---------- Heat-map (clickable) ---------- */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem}
+.cell{
+  aspect-ratio:1;border-radius:.375rem;
+  background:var(--stone-200);cursor:pointer;
+  transition:background .3s,transform .2s;
+}
+.cell:hover{transform:scale(1.1)}
+.level0{background:var(--stone-200)}
+.level1{background:var(--amber-100)}
+.level2{background:var(--amber-300)}
+.level3{background:var(--amber-500)}
+
+/* ---------- Completion Line with confetti ---------- */
+canvas{max-width:100%;height:180px}
+.confetti{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  background:var(--amber-400);pointer-events:none;
+  animation:pop .6s ease-out forwards;
+}
+@keyframes pop{
+  0%{transform:translateY(0) scale(1);opacity:1}
+  100%{transform:translateY(-60px) scale(0);opacity:0}
+}
+</style>
+</head>
+<body>
+
+<h1>Your Reward Zone</h1>
+
+<!-- Interactive Streak Flames -->
+<div class="section">
+  <h2>Your longest streaks – tap to celebrate!</h2>
+  <div class="streak-flames">
+    <div class="flame-card" data-streak="21">
+      <div class="emoji">🏃</div>
+      <div class="label">Run</div>
+      <div class="counter">21</div>
+    </div>
+    <div class="flame-card" data-streak="14">
+      <div class="emoji">📔</div>
+      <div class="label">Journal</div>
+      <div class="counter">14</div>
+    </div>
+    <div class="flame-card" data-streak="9">
+      <div class="emoji">💧</div>
+      <div class="label">Water</div>
+      <div class="counter">9</div>
+    </div>
+  </div>
+</div>
+
+<!-- Clickable Heat-map -->
+<div class="section">
+  <h2>Weekly heat-map – click to add intensity</h2>
+  <div class="heatmap" id="heatmap"></div>
+</div>
+
+<!-- Line chart with reward -->
+<div class="section">
+  <h2>30-day completions</h2>
+  <canvas id="lineChart" width="600" height="180"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+/* ---------- Streak Flames burst ---------- */
+document.querySelectorAll('.flame-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    card.classList.add('burst');
+    setTimeout(()=>card.classList.remove('burst'),600);
+    // create mini confetti
+    for(let i=0;i<15;i++){
+      const c=document.createElement('div');
+      c.className='confetti';
+      c.style.left=Math.random()*100+'%';
+      c.style.top=Math.random()*100+'%';
+      card.appendChild(c);
+      setTimeout(()=>c.remove(),600);
+    }
+  });
+});
+
+/* ---------- Clickable Heat-map ---------- */
+const days=['M','T','W','T','F','S','S'];
+const heat=document.getElementById('heatmap');
+days.forEach((d,i)=>{
+  const cell=document.createElement('div');
+  cell.className='cell level0';
+  cell.textContent=d;
+  cell.dataset.level=0;
+  cell.addEventListener('click',()=>{
+    let lvl=+cell.dataset.level;
+    lvl=(lvl+1)%4;
+    cell.dataset.level=lvl;
+    cell.className=`cell level${lvl}`;
+  });
+  heat.appendChild(cell);
+});
+
+/* ---------- Line chart ---------- */
+const ctx=document.getElementById('lineChart');
+new Chart(ctx,{
+  type:'line',
+  data:{
+    labels:Array.from({length:30},(_,i)=>i+1),
+    datasets:[{
+      data:[3,4,2,5,4,3,6,5,4,5,4,3,5,6,4,5,6,7,6,5,6,7,8,7,6,7,8,9,8,9],
+      borderColor:'#f59e0b',
+      backgroundColor:'rgba(245,158,11,.1)',
+      borderWidth:3,
+      fill:true,
+      tension:.35,
+      pointRadius:0,
+      pointHoverRadius:6
+    }]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{beginAtZero:true,max:10,ticks:{stepSize:2}},
+      x:{display:false}
+    }
+  }
+});
+</script>
+</body>
+</html>

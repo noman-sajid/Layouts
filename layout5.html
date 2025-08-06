@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Habit Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amber-50:#fffbeb;--amber-100:#fef3c7;--amber-200:#fde68a;--amber-400:#fbbf24;
+  --amber-500:#f59e0b;--amber-600:#d97706;--stone-50:#fafaf9;--stone-100:#f5f5f4;
+  --stone-200:#e7e5e4;--stone-300:#d6d3d1;--stone-500:#78716c;--stone-700:#44403c;
+  --stone-800:#292524;--stone-900:#1c1917;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:var(--stone-50);color:var(--stone-800);padding:1.5rem;transition:background .3s,color .3s}
+body.dark{background:var(--stone-900);color:var(--stone-200)}
+h1{font-size:1.75rem;font-weight:700;margin-bottom:1.5rem}
+section{background:#fff;border:1px solid var(--stone-200);border-radius:1.25rem;padding:1.5rem;margin-bottom:1.5rem}
+body.dark section{background:var(--stone-800);border-color:var(--stone-700)}
+.section-title{font-size:1.125rem;font-weight:600;margin-bottom:1rem;color:var(--stone-700)}
+body.dark .section-title{color:var(--stone-200)}
+
+/* 1. Streak Flame */
+.streak-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.75rem}
+.streak-item{text-align:center;font-size:.75rem;font-weight:600}
+.streak-flame{font-size:2rem;margin-bottom:.25rem;transition:transform .2s}
+.streak-item:hover .streak-flame{transform:scale(1.2)}
+
+/* 2. Weekly Heat-map */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem;font-size:.75rem}
+.heatmap div{aspect-ratio:1;border-radius:.375rem;display:flex;align-items:center;justify-content:center;font-weight:500}
+.level0{background:var(--stone-100)}.level1{background:var(--amber-100)}.level2{background:var(--amber-300)}.level3{background:var(--amber-500)}
+body.dark .level0{background:var(--stone-700)}body.dark .level1{background:var(--amber-800)}body.dark .level2{background:var(--amber-600)}body.dark .level3{background:var(--amber-400)}
+
+/* 3. Completions Line */
+canvas{max-width:100%;height:180px}
+</style>
+</head>
+<body>
+
+<h1>Analytics</h1>
+
+<!-- 1. Longest-Streak Flames -->
+<section>
+  <div class="section-title">Longest streaks</div>
+  <div class="streak-grid">
+    <div class="streak-item">
+      <div class="streak-flame">🏃</div>
+      <div>21 days</div>
+    </div>
+    <div class="streak-item">
+      <div class="streak-flame">📔</div>
+      <div>14 days</div>
+    </div>
+    <div class="streak-item">
+      <div class="streak-flame">💧</div>
+      <div>9 days</div>
+    </div>
+    <div class="streak-item">
+      <div class="streak-flame">🧘</div>
+      <div>5 days</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Weekly Heat-map -->
+<section>
+  <div class="section-title">This week</div>
+  <div class="heatmap">
+    <div class="level0">M</div><div class="level2">T</div><div class="level3">W</div>
+    <div class="level1">T</div><div class="level3">F</div><div class="level0">S</div><div class="level2">S</div>
+  </div>
+</section>
+
+<!-- 3. Completions over last 30 days -->
+<section>
+  <div class="section-title">Completions (30 days)</div>
+  <canvas id="lineChart" width="600" height="180"></canvas>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Dark-mode toggle (demo only)
+const toggle = document.createElement('input');
+toggle.type = 'checkbox';
+toggle.style.cssText = 'position:fixed;top:1rem;right:1rem;transform:scale(1.3)';
+toggle.onchange = () => document.body.classList.toggle('dark');
+document.body.appendChild(toggle);
+
+// Line chart
+const ctx = document.getElementById('lineChart');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: Array.from({length: 30}, (_, i) => i + 1),
+    datasets: [{
+      label: 'Habits completed',
+      data: [3,4,2,5,4,3,6,5,4,5,4,3,5,6,4,5,6,7,6,5,6,7,8,7,6,7,8,9,8,9],
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245,158,11,.1)',
+      borderWidth: 2,
+      fill: true,
+      tension: .35,
+      pointRadius: 0,
+      pointHoverRadius: 5
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{beginAtZero:true,max:10,ticks:{stepSize:2}},
+      x:{display:false}
+    }
+  }
+});
+</script>
+</body>
+</html>

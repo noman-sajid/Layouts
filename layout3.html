@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 transition-colors duration-300">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        
+        <!-- Header Section -->
+        <header class="bg-white dark:bg-stone-800 rounded-2xl p-6 mb-8 shadow-sm border border-stone-200 dark:border-stone-700">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <!-- Avatar -->
+                    <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        JD
+                    </div>
+                    <!-- Welcome Text -->
+                    <div class="text-center md:text-left">
+                        <h1 class="text-2xl md:text-3xl font-bold text-stone-900 dark:text-stone-100 mb-1">
+                            Welcome back, Jordan!
+                        </h1>
+                        <p class="text-stone-600 dark:text-stone-400">
+                            Let's make today count 🌟
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Header Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="p-2.5 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded-xl transition-colors duration-200">
+                        <span id="theme-icon" class="text-xl">🌙</span>
+                    </button>
+                    <button class="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Statistics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Habits -->
+            <div class="bg-white dark:bg-stone-800 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-700 hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-white text-lg">
+                        📊
+                    </div>
+                    <div class="text-sm font-medium text-stone-600 dark:text-stone-400">
+                        Total Habits
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-stone-900 dark:text-stone-100">
+                    12
+                </div>
+            </div>
+
+            <!-- Completed Today -->
+            <div class="bg-white dark:bg-stone-800 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-700 hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-white text-lg">
+                        ✅
+                    </div>
+                    <div class="text-sm font-medium text-stone-600 dark:text-stone-400">
+                        Completed Today
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-stone-900 dark:text-stone-100">
+                    8
+                </div>
+            </div>
+
+            <!-- Best Streak -->
+            <div class="bg-white dark:bg-stone-800 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-700 hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-white text-lg">
+                        🔥
+                    </div>
+                    <div class="text-sm font-medium text-stone-600 dark:text-stone-400">
+                        Best Streak
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-stone-900 dark:text-stone-100">
+                    47
+                </div>
+            </div>
+
+            <!-- Minutes Logged -->
+            <div class="bg-white dark:bg-stone-800 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-700 hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-white text-lg">
+                        ⏱️
+                    </div>
+                    <div class="text-sm font-medium text-stone-600 dark:text-stone-400">
+                        Minutes Today
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-stone-900 dark:text-stone-100">
+                    145
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Habits Section -->
+        <div class="bg-white dark:bg-stone-800 rounded-2xl p-6 mb-8 shadow-sm border border-stone-200 dark:border-stone-700">
+            <h2 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-6">
+                Recent Habits
+            </h2>
+            
+            <div class="space-y-3">
+                <!-- Habit Item -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors duration-200 gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">💧</span>
+                        <span class="font-medium text-stone-900 dark:text-stone-100">
+                            Drink 8 glasses of water
+                        </span>
+                    </div>
+                    <div class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-full shadow-sm">
+                        23 days
+                    </div>
+                </div>
+
+                <!-- Habit Item -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors duration-200 gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">🏃‍♂️</span>
+                        <span class="font-medium text-stone-900 dark:text-stone-100">
+                            Morning run
+                        </span>
+                    </div>
+                    <div class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-full shadow-sm">
+                        12 days
+                    </div>
+                </div>
+
+                <!-- Habit Item -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors duration-200 gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">📚</span>
+                        <span class="font-medium text-stone-900 dark:text-stone-100">
+                            Read for 30 minutes
+                        </span>
+                    </div>
+                    <div class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-full shadow-sm">
+                        8 days
+                    </div>
+                </div>
+
+                <!-- Habit Item -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors duration-200 gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">🧘‍♀️</span>
+                        <span class="font-medium text-stone-900 dark:text-stone-100">
+                            Evening meditation
+                        </span>
+                    </div>
+                    <div class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-full shadow-sm">
+                        15 days
+                    </div>
+                </div>
+
+                <!-- Habit Item -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors duration-200 gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">🥗</span>
+                        <span class="font-medium text-stone-900 dark:text-stone-100">
+                            Eat a healthy breakfast
+                        </span>
+                    </div>
+                    <div class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-full shadow-sm">
+                        5 days
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Create Habit - Primary Button -->
+            <button class="group bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl p-8 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 text-left">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    ➕
+                </div>
+                <h3 class="text-xl font-bold mb-2">Create Habit</h3>
+                <p class="text-amber-100 text-sm opacity-90">
+                    Start building a new positive habit
+                </p>
+            </button>
+
+            <!-- View Analytics -->
+            <button class="group bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 hover:border-amber-300 dark:hover:border-amber-500 rounded-2xl p-8 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 text-left">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    📈
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-stone-900 dark:text-stone-100">View Analytics</h3>
+                <p class="text-stone-600 dark:text-stone-400 text-sm">
+                    Track your progress over time
+                </p>
+            </button>
+
+            <!-- History -->
+            <button class="group bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 hover:border-amber-300 dark:hover:border-amber-500 rounded-2xl p-8 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 text-left sm:col-span-2 lg:col-span-1">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    📋
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-stone-900 dark:text-stone-100">History</h3>
+                <p class="text-stone-600 dark:text-stone-400 text-sm">
+                    Review your past achievements
+                </p>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                themeIcon.textContent = '🌙';
+            }
+        });
+
+        // Add click animations to interactive elements
+        document.addEventListener('click', function(e) {
+            const clickable = e.target.closest('[class*="hover:"], button');
+            if (clickable && !clickable.disabled) {
+                clickable.style.transform = clickable.style.transform + ' scale(0.95)';
+                setTimeout(() => {
+                    clickable.style.transform = clickable.style.transform.replace(' scale(0.95)', '');
+                }, 150);
+            }
+        });
+
+        // Simulate real-time updates
+        let completedCount = 8;
+        let minutesCount = 145;
+
+        setInterval(() => {
+            if (Math.random() > 0.995) {
+                const completedElement = document.querySelector('.grid .bg-white:nth-child(2) .text-3xl');
+                if (completedCount < 12) {
+                    completedCount++;
+                    completedElement.textContent = completedCount;
+                    completedElement.classList.add('text-amber-500', 'animate-pulse');
+                    setTimeout(() => {
+                        completedElement.classList.remove('text-amber-500', 'animate-pulse');
+                    }, 2000);
+                }
+            }
+            
+            if (Math.random() > 0.99) {
+                const minutesElement = document.querySelector('.grid .bg-white:nth-child(4) .text-3xl');
+                minutesCount += Math.floor(Math.random() * 5) + 1;
+                minutesElement.textContent = minutesCount;
+                minutesElement.classList.add('text-amber-500');
+                setTimeout(() => {
+                    minutesElement.classList.remove('text-amber-500');
+                }, 1500);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
