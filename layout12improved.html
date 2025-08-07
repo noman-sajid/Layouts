@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hibo's Habit Journey - Cinematic Scroll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+    :root {
+        --stone: #D6CCC2;
+        --amber: #FFB300;
+        --amber-light: #FFD54F;
+        --burnout: #F0EDEB;
+        --giving-up: #E6E1DF;
+        --secret: #FBE8C6;
+        --success: #FFC107;
+        --text-dark: #403d39;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--stone);
+        color: var(--text-dark);
+        overflow-x: hidden;
+    }
+
+    .story-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .panel {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+        overflow: hidden;
+    }
+
+    .panel h2 {
+        font-size: clamp(2rem, 6vw, 4.5rem);
+        font-weight: 700;
+        max-width: 90%;
+        line-height: 1.2;
+        z-index: 2;
+        filter: blur(0px);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+        .panel h2 {
+            font-size: clamp(1.6rem, 5vw, 3rem);
+        }
+        .illustration {
+            font-size: clamp(4rem, 15vw, 8rem);
+        }
+    }
+
+    .word {
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: top;
+    }
+
+    .word-inner {
+        display: inline-block;
+    }
+
+    .illustration {
+        font-size: clamp(6rem, 20vw, 12rem);
+        position: absolute;
+        z-index: 1;
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    #cta-button {
+        margin-top: 2rem;
+        padding: 1rem 2rem;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        font-weight: 700;
+        color: var(--text-dark);
+        background-color: #fff;
+        border-radius: 40px;
+        text-decoration: none;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        display: inline-block;
+        z-index: 2;
+    }
+
+    #cta-button.glow {
+        animation: glow 2s infinite;
+    }
+
+    @keyframes glow {
+        0% { box-shadow: 0 0 5px #fff, 0 0 10px var(--amber), 0 0 15px var(--amber); }
+        50% { box-shadow: 0 0 20px #fff, 0 0 30px var(--amber); }
+        100% { box-shadow: 0 0 5px #fff, 0 0 10px var(--amber), 0 0 15px var(--amber); }
+    }
+
+    #cta-button:hover {
+        transform: translateY(-3px) scale(1.05);
+    }
+
+    /* Scroll guide */
+    #scroll-guide {
+        position: fixed;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+        font-size: 1rem;
+        color: #403d39;
+        opacity: 0.8;
+        animation: bounce 1.5s infinite;
+        z-index: 5;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    /* Skip button */
+    #skip-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #fff;
+        color: var(--text-dark);
+        border: none;
+        border-radius: 30px;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: bold;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(20px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: background 0.3s ease;
+        z-index: 10;
+    }
+    #skip-button:hover {
+        background: var(--amber);
+        color: #fff;
+    }
+
+    #confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 100;
+    }
+
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 15px;
+        opacity: 0;
+    }
+</style>
+</head>
+<body>
+
+<div id="scroll-guide">↓ Scroll to continue ↓</div>
+<button id="skip-button">Cut the crap 😂</button>
+
+<main class="story-wrapper">
+    <section class="panel" data-bg="var(--stone)">
+        <div class="illustration">👋</div>
+        <h2>Meet Hibo.</h2>
+    </section>
+    <section class="panel" data-bg="var(--amber)">
+        <div class="illustration">🚀</div>
+        <h2>Today, Hibo decides to change everything!</h2>
+    </section>
+    <section class="panel" data-bg="var(--amber-light)">
+        <div class="illustration">🏋️‍♂️</div>
+        <h2>He pushes hard for a week…</h2>
+    </section>
+    <section class="panel" data-bg="var(--burnout)">
+        <div class="illustration">😩</div>
+        <h2>But motivation fades.</h2>
+    </section>
+    <section class="panel" data-bg="var(--giving-up)">
+        <div class="illustration">🛑</div>
+        <h2>Everything stops again.</h2>
+    </section>
+    <section class="panel" data-bg="var(--secret)">
+        <div class="illustration">💡</div>
+        <h2>Until he finds the secret.</h2>
+    </section>
+    <section class="panel" data-bg="var(--amber)">
+        <div class="illustration">🤫</div>
+        <h2>Small steps. Consistency. Not motivation.</h2>
+    </section>
+    <section class="panel" data-bg="var(--success)">
+        <div class="illustration">🏆</div>
+        <h2>Now, Hibo builds habits for life.</h2>
+        <a href="#" id="cta-button">Start Your Journey</a>
+    </section>
+</main>
+
+<div id="confetti-container"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Split text for animation
+    document.querySelectorAll('.panel h2').forEach(el => {
+        if (!el.querySelector('#cta-button')) {
+            el.innerHTML = el.innerText.split(/\s+/).map(word => 
+                `<span class="word"><span class="word-inner">${word}</span></span>`
+            ).join(' ');
+        }
+    });
+
+    const panels = document.querySelectorAll('.panel');
+
+    ScrollTrigger.create({
+        trigger: panels[0],
+        start: "bottom top",
+        onEnter: () => gsap.to("#scroll-guide", { opacity: 0, duration: 0.5 }),
+        onLeaveBack: () => gsap.to("#scroll-guide", { opacity: 1, duration: 0.5 })
+    });
+
+    gsap.to("#skip-button", { opacity: 1, y: 0, duration: 0.8, delay: 1 });
+
+    document.getElementById('skip-button').addEventListener('click', () => {
+        const lastPanel = panels[panels.length - 1];
+        window.scrollTo({ top: lastPanel.offsetTop, behavior: "smooth" });
+    });
+
+    const animations = [
+        { from: { y: '100%', opacity: 0 }, to: { y: '0%', opacity: 1 } },
+        { from: { x: '-100%', opacity: 0 }, to: { x: '0%', opacity: 1 } },
+        { from: { x: '100%', opacity: 0 }, to: { x: '0%', opacity: 1 } },
+        { from: { scale: 0.5, opacity: 0 }, to: { scale: 1, opacity: 1 } },
+        { from: { rotationX: -90, opacity: 0 }, to: { rotationX: 0, opacity: 1 } }
+    ];
+
+    const pinDuration = window.innerWidth < 768 ? "+=120%" : "+=130%";
+
+    panels.forEach((panel, i) => {
+        const illustration = panel.querySelector('.illustration');
+        const words = panel.querySelectorAll('.word-inner');
+        const cta = panel.querySelector('#cta-button');
+        const animChoice = animations[i % animations.length];
+
+        let tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: panel,
+                start: "top top",
+                end: pinDuration,
+                scrub: 1,
+                pin: true
+            }
+        });
+
+        // Background transition
+        tl.to('body', { backgroundColor: panel.dataset.bg, duration: 0.3 }, 0);
+
+        // Illustration enters first
+        tl.fromTo(illustration,
+            { opacity: 0, scale: 0.5, y: '50%' },
+            { opacity: 1, scale: 1, y: '0%', duration: 1, ease: 'back.out(1.7)' },
+            0
+        );
+
+        // Delay before text appears
+        tl.addPause('+=0.3');
+
+        // Then text appears
+        tl.fromTo(words,
+            animChoice.from,
+            { ...animChoice.to, duration: 1, stagger: 0.1, ease: 'power2.out' },
+            '+=0.2'
+        );
+
+        // Optional blur effect for text fade-out on desktop
+        if (window.innerWidth > 480) {
+            gsap.to(panel.querySelector('h2'), {
+                filter: "blur(3px)",
+                scrollTrigger: { trigger: panel, start: "bottom center", end: "bottom top", scrub: true }
+            });
+        }
+
+        // Illustration parallax effect
+        gsap.to(illustration, {
+            yPercent: 10,
+            scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: true }
+        });
+
+        // Exit fade for both
+        tl.to([illustration, words], { opacity: 0, duration: 0.5 }, '+=0.8');
+
+        // Last panel CTA
+        if (i === panels.length - 1 && cta) {
+            const fadeInTl = gsap.timeline({
+                scrollTrigger: { trigger: panel, start: "top top", end: pinDuration, scrub: 1 }
+            });
+
+            fadeInTl.fromTo(cta, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, onStart: () => {
+                if(!cta.classList.contains('glow-started')) {
+                    cta.classList.add('glow', 'glow-started');
+                    launchConfetti();
+                }
+            }}, '+=1.2');
+        }
+    });
+
+    function launchConfetti() {
+        const container = document.getElementById('confetti-container');
+        const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4', '#FFFFFF'];
+        for (let i = 0; i < 150; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.top = `-20%`;
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+            container.appendChild(confetti);
+            gsap.to(confetti, {
+                y: '120vh', x: `random(-200, 200)`, rotation: `random(360, 720)`, scale: `random(0.5, 1.5)`,
+                opacity: 1, duration: `random(3, 6)`, delay: Math.random() * 2,
+                onComplete: () => confetti.remove()
+            });
+        }
+    }
+});
+
+
+</script>
+</body>
+</html>
