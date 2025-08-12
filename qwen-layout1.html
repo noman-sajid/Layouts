@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hibo – The Habit Odyssey (Fixed & Working)</title>
+
+  <!-- Load Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <style>
+    /* Ensure body is black and no margin */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Fullscreen container */
+    #pin-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Image layers */
+    .layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.8);
+      opacity: 0;
+      will-change: opacity, transform;
+    }
+
+    /* Text container */
+    .text-container {
+      position: absolute;
+      font-weight: 900;
+      text-align: center;
+      color: white;
+      text-shadow: 
+        0 2px 5px rgba(0,0,0,0.8),
+        0 4px 15px rgba(255,215,0,0.4);
+      opacity: 0;
+      letter-spacing: -0.02em;
+      font-size: clamp(2rem, 5vw, 4rem);
+      transform: translate(-50%, -50%);
+    }
+
+    .char {
+      display: inline-block;
+    }
+
+    /* Vignette overlay */
+    .vignette {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, transparent 10%, rgba(0,0,0,0.6) 90%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      animation: bounce 1.5s infinite;
+      filter: drop-shadow(0 0 8px rgba(255,215,0,0.6));
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    /* Holographic text */
+    .holographic {
+      background: linear-gradient(60deg, #ff0080, #7928ca, #00d4ff, #00ff88);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: slideGradient 8s linear infinite;
+    }
+    @keyframes slideGradient {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 300% 50%; }
+    }
+
+    /* Light sweep effect */
+    .light-sweep {
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      pointer-events: none;
+      z-index: 3;
+    }
+  </style>
+
+  <!-- Load Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-black text-white">
+
+  <!-- === SCROLL ANIMATION SECTION === -->
+  <div id="pin-container" class="relative w-full h-screen overflow-hidden">
+    <div class="vignette"></div>
+    
+    <!-- Scroll Indicator -->
+    <div id="scroll-indicator" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50 text-white opacity-80 cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" class="scroll-indicator w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- === CTA SECTION === -->
+  <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#0F0F23] via-[#1A1A2E] to-[#16213E]">
+    <h2 class="text-[clamp(2.5rem,6vw,5rem)] mb-4 text-center font-bold">Start Your Journey</h2>
+    <p class="text-[clamp(1rem,2vw,1.2rem)] max-w-xl mb-8 text-center">Transform your life through the power of small, consistent habits. Every expert was once a beginner.</p>
+    <a href="#" id="cta-button" class="px-8 py-4 text-lg font-bold text-black bg-yellow-400 rounded-full transition-all hover:scale-105 hover:shadow-2xl">Begin Your Transformation 🚀</a>
+    <div id="confetti-container" class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-50"></div>
+  </section>
+
+  <!-- Load GSAP + ScrollTrigger from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    // Wait for everything to load
+    window.addEventListener('load', () => {
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Only proceed if DOM is ready
+      if (!document.getElementById('pin-container')) return;
+
+      // ======================
+      // 🔥 Enhanced Animations
+      // ======================
+      const animations = {
+        slideUp: chars => gsap.from(chars, { y: 60, opacity: 0, stagger: 0.03, ease: 'power2.out' }),
+        scaleIn: chars => gsap.from(chars, { scale: 0.5, opacity: 0, stagger: 0.04, ease: 'back.out(1.7)' }),
+        fadeIn: chars => gsap.from(chars, { opacity: 0, stagger: 0.05, ease: 'power1.inOut' }),
+        tripleBounce: (chars, container, sceneDuration) => {
+          gsap.set(container, { xPercent: -50, yPercent: -50 });
+          const tl = gsap.timeline();
+          tl.to(container, { opacity: 1, duration: 0.2 });
+          tl.addLabel("jump1", sceneDuration / 3);
+          tl.addLabel("jump2", (sceneDuration / 3) * 2);
+          tl.set(container, { scale: 1 }, 0);
+          tl.set(container, { scale: 2.2 }, "jump1");
+          tl.set(container, { scale: 3.4 }, "jump2");
+          tl.set(container, { scale: 4.5 }, sceneDuration);
+          return tl;
+        },
+        tripleBounceImage: (layer, sceneDuration) => {
+          const tl = gsap.timeline();
+          tl.addLabel("jump1", sceneDuration / 3);
+          tl.addLabel("jump2", (sceneDuration / 3) * 2);
+          tl.set(layer, { scale: 1 }, 0);
+          tl.set(layer, { scale: 1.2 }, "jump1");
+          tl.set(layer, { scale: 1.4 }, "jump2");
+          tl.set(layer, { scale: 1.6 }, sceneDuration);
+          return tl;
+        },
+        holographicWave: chars => {
+          return gsap.from(chars, {
+            y: 80,
+            rotationX: -90,
+            opacity: 0,
+            color: "#fff",
+            stagger: { amount: 0.8, from: "center" },
+            ease: "elastic.out(1, 0.5)",
+            duration: 1
+          });
+        },
+        lightSweep: (chars, container) => {
+          const sweep = document.createElement('div');
+          sweep.className = 'light-sweep';
+          container.appendChild(sweep);
+
+          const tl = gsap.timeline();
+          tl.to(sweep, { left: "100%", duration: 1.2, ease: "power2.out" })
+            .to(chars, { opacity: 1, x: 0, stagger: 0.05, ease: "power3.out" }, "<");
+          return tl;
+        }
+      };
+
+      const storyConfig = {
+        scenes: [
+          { text: "This is Hibo.", image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop", animation: "holographicWave", position: { top: "50%", left: "50%" } },
+          { text: "A burst of motivation.", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop", animation: "scaleIn", position: { top: "20%", left: "50%" } },
+          { text: "He worked harder and harder.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop", animation: "fadeIn", position: { top: "80%", left: "50%" } },
+          { text: "Again", image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop", animation: "tripleBounce", position: { top: "50%", left: "50%" } },
+          { text: "He found the secret.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", animation: "lightSweep", position: { top: "30%", left: "80%" } },
+          { text: "Start your journey.", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop", animation: "scaleIn", position: { top: "60%", left: "25%" } }
+        ]
+      };
+
+      const pinContainer = document.getElementById('pin-container');
+      const ctaSection = document.getElementById('cta-section');
+      const layers = [];
+      const textContainers = [];
+
+      // Create layers and text containers
+      storyConfig.scenes.forEach(scene => {
+        const layer = document.createElement('div');
+        layer.className = 'layer';
+        layer.style.backgroundImage = `url('${scene.image}')`;
+        pinContainer.appendChild(layer);
+        layers.push(layer);
+
+        const textContainer = document.createElement('div');
+        textContainer.className = 'text-container';
+        if (scene.animation === "holographicWave") textContainer.classList.add('holographic');
+        textContainer.style.top = scene.position.top;
+        textContainer.style.left = scene.position.left;
+        textContainer.innerHTML = scene.text.split("").map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join("");
+        pinContainer.appendChild(textContainer);
+        textContainers.push(textContainer);
+      });
+
+      // Master Timeline
+      const masterTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pinContainer,
+          pin: true,
+          scrub: 1,
+          end: "+=12000"
+        }
+      });
+
+      storyConfig.scenes.forEach((scene, index) => {
+        const layer = layers[index];
+        const textContainer = textContainers[index];
+        const chars = textContainer.querySelectorAll('.char');
+
+        masterTl.to(layer, { opacity: 1, duration: 1 }, "+=0");
+
+        if (scene.animation === "tripleBounce") {
+          const sceneDuration = 3;
+          masterTl.add(animations.tripleBounce(chars, textContainer, sceneDuration), "<");
+          masterTl.add(animations.tripleBounceImage(layer, sceneDuration), "<");
+        } else {
+          masterTl.to(textContainer, { opacity: 1, duration: 0.1 }, "<");
+          masterTl.add(animations[scene.animation](chars, textContainer), "<");
+        }
+
+        masterTl.to({}, { duration: 0.8 });
+        if (index < storyConfig.scenes.length - 1) {
+          masterTl.to(layer, { opacity: 0, duration: 1 });
+          masterTl.to(textContainer, { opacity: 0, duration: 1 }, "<");
+        }
+      });
+
+      // CTA Animation
+      gsap.from(ctaSection, {
+        scrollTrigger: {
+          trigger: ctaSection,
+          start: "top 80%",
+          onEnter: () => launchConfetti(150)
+        },
+        opacity: 0,
+        scale: 0.9,
+        duration: 1
+      });
+
+      // Confetti
+      function launchConfetti(count = 100) {
+        const container = document.getElementById('confetti-container');
+        if (!container) return;
+        const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4'];
+        for (let i = 0; i < count; i++) {
+          const confetti = document.createElement('div');
+          confetti.style.cssText = `
+            position: absolute;
+            width: ${Math.random() * 10 + 5}px;
+            height: ${Math.random() * 15 + 8}px;
+            opacity: 0;
+            left: ${Math.random() * 100}%;
+            top: -20%;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            transform: rotate(${Math.random() * 360}deg);
+          `;
+          container.appendChild(confetti);
+          gsap.to(confetti, {
+            y: '120vh',
+            x: gsap.utils.random(-200, 200),
+            rotation: gsap.utils.random(360, 720),
+            opacity: 1,
+            duration: gsap.utils.random(3, 6),
+            delay: Math.random() * 0.5,
+            ease: "power1.out",
+            onComplete: () => confetti.remove()
+          });
+        }
+      }
+
+      // Scroll indicator
+      document.getElementById('scroll-indicator')?.addEventListener('click', () => {
+        window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

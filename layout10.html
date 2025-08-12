@@ -1,151 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Hibo's Journey - Smooth Scroll Story</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;900&display=swap" rel="stylesheet">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    height: 100%;
-    font-family: 'Poppins', sans-serif;
-    overflow-x: hidden;
-  }
-  body {
-    background: #D6CCC2;
-    color: #333;
-  }
-  .scroll-area {
-    height: 800vh; /* 8 scenes = 8 full screens */
-  }
-  .story-wrapper {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background: #D6CCC2;
-  }
-  section {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transform: translateY(100px);
-  }
-  .headline {
-    font-size: clamp(2rem, 8vw, 6rem);
-    font-weight: 900;
-    letter-spacing: 1px;
-    max-width: 90%;
-    margin-bottom: 30px;
-  }
-  .illustration {
-    font-size: clamp(3rem, 10vw, 8rem);
-    margin-bottom: 10px;
-  }
-  .cta {
-    margin-top: 30px;
-    padding: 15px 35px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-    background: #FFB300;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    display: none;
-  }
-  .cta:hover {
-    transform: scale(1.1);
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hibo – The Habit Odyssey (Cinematic)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    .layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100vh;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.8);
+      opacity: 0;
+      /* Ensure transform origins are centered for consistent scaling/rotation */
+      transform-origin: center center;
+    }
+    .text-container {
+      position: absolute;
+      font-weight: 700;
+      text-align: center;
+      color: white;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.7);
+      opacity: 0;
+      z-index: 10; /* Ensure text is above letterbox bars if they appear over content */
+    }
+    .text-container .char {
+      display: inline-block;
+    }
+    /* Scroll down indicator animation */
+    .scroll-indicator {
+      animation: bounce 1.5s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* Cinematic Letterbox Bars */
+    .letterbox {
+      position: fixed;
+      left: 0;
+      width: 100%;
+      height: 0; /* Will be animated */
+      background-color: black;
+      z-index: 100; /* Always on top */
+      opacity: 0; /* Start hidden */
+    }
+    #letterbox-top {
+      top: 0;
+    }
+    #letterbox-bottom {
+      bottom: 0;
+    }
+  </style>
 </head>
-<body>
-<div class="scroll-area"></div>
-<div class="story-wrapper">
-  <section data-bg="#D6CCC2" data-emoji="😴" data-text="Meet Hibo."></section>
-  <section data-bg="#FFB300" data-emoji="💡" data-text="Today, Hibo decides to change everything!"></section>
-  <section data-bg="linear-gradient(135deg, #FFB300, #FFD54F)" data-emoji="🏋️" data-text="He pushes hard for a week…"></section>
-  <section data-bg="#F0EDEB" data-emoji="😓" data-text="But motivation fades."></section>
-  <section data-bg="#E6E1DF" data-emoji="😞" data-text="Everything stops again."></section>
-  <section data-bg="linear-gradient(135deg, #FFB300, #FFA000)" data-emoji="📱" data-text="Until he finds Habitium."></section>
-  <section data-bg="#FBE8C6" data-emoji="🌱" data-text="The secret? Small steps. Consistency. Not motivation."></section>
-  <section data-bg="#FFD54F" data-emoji="🎉" data-text="Now, Hibo builds habits for life."></section>
-</div>
+<body class="bg-black text-white overflow-x-hidden">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script>
-  gsap.registerPlugin(ScrollTrigger);
+  <div id="pin-container" class="relative w-full h-screen overflow-hidden">
+    <!-- Cinematic Letterbox Bars -->
+    <div id="letterbox-top" class="letterbox"></div>
+    <div id="letterbox-bottom" class="letterbox"></div>
 
-  const sections = document.querySelectorAll("section");
-  const wrapper = document.querySelector(".story-wrapper");
+    <!-- Scroll Down Indicator -->
+    <div id="scroll-indicator" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50 text-white opacity-80 cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" class="scroll-indicator w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+  </div>
+  
+  <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#0F0F23] via-[#1A1A2E] to-[#16213E] rounded-b-[4rem] md:rounded-b-[8rem] shadow-2xl">
+    <h2 class="text-[clamp(2.5rem,6vw,5rem)] mb-4 text-center font-bold px-4">Start Your Journey</h2>
+    <p class="text-[clamp(1rem,2vw,1.2rem)] max-w-xl mb-8 text-center px-4 leading-relaxed">Transform your life through the power of small, consistent habits. Every expert was once a beginner.</p>
+    <a href="#" id="cta-button" class="px-10 py-5 text-xl font-bold text-black bg-yellow-400 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300 transform motion-safe:hover:animate-pulse">Begin Your Transformation 🚀</a>
+    <div id="confetti-container" class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-50"></div>
+  </section>
 
-  // Add content to each section
-  sections.forEach((section, i) => {
-    const headline = document.createElement("h1");
-    headline.className = "headline";
-    headline.innerText = section.dataset.text;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
 
-    const illustration = document.createElement("div");
-    illustration.className = "illustration";
-    illustration.innerText = section.dataset.emoji;
+    const animations = {
+      // Original ones
+      slideUp: chars => gsap.from(chars, { y: 60, opacity: 0, stagger: 0.03, ease: 'power2.out' }),
+      scaleIn: chars => gsap.from(chars, { scale: 0.5, opacity: 0, stagger: 0.04, ease: 'back.out(1.7)' }),
+      fadeIn: chars => gsap.from(chars, { opacity: 0, stagger: 0.05, ease: 'power1.inOut' }),
+      tripleBounce: (chars, container, sceneDuration) => {
+        gsap.set(container, { xPercent: -50, yPercent: -50 });
+        const tl = gsap.timeline();
+        tl.to(container, { opacity: 1, duration: 0.2 });
+        tl.addLabel("jump1", sceneDuration / 3);
+        tl.addLabel("jump2", (sceneDuration / 3) * 2);
+        tl.set(container, { scale: 1 }, 0);
+        tl.set(container, { scale: 2.2 }, "jump1");
+        tl.set(container, { scale: 3.4 }, "jump2");
+        tl.set(container, { scale: 4.5 }, sceneDuration);
+        return tl;
+      },
+      tripleBounceImage: (layer, sceneDuration) => {
+        const tl = gsap.timeline();
+        tl.addLabel("jump1", sceneDuration / 3);
+        tl.addLabel("jump2", (sceneDuration / 3) * 2);
+        tl.set(layer, { scale: 1 }, 0);
+        tl.set(layer, { scale: 1.2 }, "jump1");
+        tl.set(layer, { scale: 1.4 }, "jump2");
+        tl.set(layer, { scale: 1.6 }, sceneDuration);
+        return tl;
+      },
 
-    section.appendChild(illustration);
-    section.appendChild(headline);
+      // New reusable text effects
+      fadeUp: chars => gsap.from(chars, { y: 40, opacity: 0, stagger: 0.05, ease: 'power3.out' }),
+      zoomRotate: chars => gsap.from(chars, { scale: 0, rotation: 180, opacity: 0, stagger: 0.06, ease: 'back.out(2)' }),
+      typeWriter: chars => gsap.from(chars, { opacity: 0, duration: 0.05, stagger: 0.05, ease: 'none' }),
+      colorPulse: chars => gsap.fromTo(chars, { color: '#fff' }, { color: '#FFD700', repeat: 3, yoyo: true, duration: 0.2, stagger: 0.05 }),
+      blurReveal: chars => gsap.from(chars, { filter: 'blur(10px)', opacity: 0, stagger: 0.04, ease: 'power2.out' }),
+      bounceIn: chars => gsap.from(chars, { y: -200, opacity: 0, ease: 'bounce.out', stagger: 0.05 }),
+      rotateXIn: chars => gsap.from(chars, { rotationX: -90, opacity: 0, transformOrigin: 'center center', stagger: 0.03, ease: 'power3.out' }),
+      slideDown: chars => gsap.from(chars, { y: -60, opacity: 0, stagger: 0.03, ease: 'power2.out' }),
+      
+      // New cinematic image/camera effects
+      cameraZoomIn: (layer) => gsap.to(layer, { scale: 1.2, duration: 3, ease: 'power2.out' }),
+      cameraZoomOut: (layer) => gsap.to(layer, { scale: 0.9, duration: 3, ease: 'power2.out' }),
+      cameraPanLeft: (layer) => gsap.to(layer, { x: '10%', duration: 3, ease: 'power1.inOut' }),
+      cameraPanRight: (layer) => gsap.to(layer, { x: '-10%', duration: 3, ease: 'power1.inOut' }),
+      cameraTiltUp: (layer) => gsap.to(layer, { y: '-10%', duration: 3, ease: 'power1.inOut' }),
+      cameraTiltDown: (layer) => gsap.to(layer, { y: '10%', duration: 3, ease: 'power1.inOut' }),
+      // Combined effect
+      zoomAndPan: (layer) => gsap.to(layer, { scale: 1.15, x: '-5%', rotation: '1deg', duration: 3.5, ease: 'power2.inOut' }),
+      smoothDollyZoom: (layer) => gsap.to(layer, {
+          scale: 1.2,
+          filter: 'brightness(1)', /* Slightly brighter as we zoom in */
+          duration: 4,
+          ease: 'power3.inOut'
+      }),
+    };
 
-    if (i === sections.length - 1) {
-      const button = document.createElement("button");
-      button.className = "cta";
-      button.innerText = "Start Your Journey";
-      button.addEventListener("click", () => {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        alert("Welcome to Habitium!");
-      });
-      section.appendChild(button);
+    const storyConfig = {
+      scenes: [
+        { text: "This is Hibo.", image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop", animation: "bounceIn", imageAnimation: "smoothDollyZoom", position: { top: "50%", left: "50%" } },
+        { text: "A burst of motivation.", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop", animation: "rotateXIn", imageAnimation: "cameraPanLeft", position: { top: "20%", left: "50%" } },
+        { text: "He worked harder and harder.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop", animation: "blurReveal", imageAnimation: "cameraZoomOut", position: { top: "80%", left: "50%" } },
+        { text: "Again", image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop", animation: "tripleBounce", imageAnimation: "tripleBounceImage", position: { top: "50%", left: "50%" } },
+        { text: "He found the secret.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", animation: "zoomRotate", imageAnimation: "cameraPanRight", position: { top: "30%", left: "80%" } },
+        { text: "Start your journey.", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop", animation: "slideDown", imageAnimation: "zoomAndPan", position: { top: "60%", left: "25%" } },
+        { text: "The Habit Odyssey.", image: "https://images.unsplash.com/photo-1605634509428-f6048d0a8f8e?w=1920&h:1080&fit=crop", animation: "typeWriter", imageAnimation: "smoothDollyZoom", position: { top: "50%", left: "50%" } }
+      ]
+    };
+
+    const pinContainer = document.getElementById('pin-container');
+    const ctaSection = document.getElementById('cta-section');
+    const layers = [];
+    const textContainers = [];
+    const letterboxTop = document.getElementById('letterbox-top');
+    const letterboxBottom = document.getElementById('letterbox-bottom');
+
+    storyConfig.scenes.forEach(scene => {
+      const layer = document.createElement('div');
+      layer.className = 'layer';
+      layer.style.backgroundImage = `url('${scene.image}')`;
+      pinContainer.appendChild(layer);
+      layers.push(layer);
+
+      const textContainer = document.createElement('div');
+      textContainer.className = 'text-container text-[clamp(2rem,5vw,4rem)]';
+      textContainer.style.top = scene.position.top;
+      textContainer.style.left = scene.position.left;
+      textContainer.style.transform = "translate(-50%, -50%)";
+      textContainer.innerHTML = scene.text.split("").map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join("");
+      pinContainer.appendChild(textContainer);
+      textContainers.push(textContainer);
+    });
+
+    const masterTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: pinContainer,
+        pin: true,
+        scrub: 1,
+        end: "+=16000" // Increased end to allow for more deliberate pacing and transitions
+      }
+    });
+
+    // Animate in the cinematic letterbox bars at the very beginning
+    masterTl.to([letterboxTop, letterboxBottom], {
+        height: '12vh', /* Adjust this value for desired bar thickness */
+        opacity: 1,
+        duration: 1.5,
+        ease: 'power2.out'
+    }, 0); // Start at the very beginning of the master timeline
+
+    storyConfig.scenes.forEach((scene, index) => {
+      const layer = layers[index];
+      const textContainer = textContainers[index];
+      const chars = textContainer.querySelectorAll('.char');
+
+      // Fade in the image layer for the current scene
+      masterTl.to(layer, { opacity: 1, duration: 1.5 }, `scene-${index}`); // Use labels for precise timing
+
+      // Handle specific animations
+      if (scene.animation === "tripleBounce") {
+        const sceneDuration = 3;
+        masterTl.add(animations.tripleBounce(chars, textContainer, sceneDuration), `scene-${index}`);
+        masterTl.add(animations.tripleBounceImage(layer, sceneDuration), `scene-${index}`);
+      } else {
+        // Fade in text container and apply text animation
+        masterTl.to(textContainer, { opacity: 1, duration: 0.5 }, `scene-${index}+=0.5`); // Text appears slightly after image
+        masterTl.add(animations[scene.animation](chars), `scene-${index}+=0.7`); // Text animation starts
+        
+        // Apply camera-like image animation if specified
+        if (scene.imageAnimation) {
+          masterTl.add(animations[scene.imageAnimation](layer), `scene-${index}`); // Image animation starts with the scene
+        } else {
+          // Default subtle image movement
+          masterTl.to(layer, { scale: 1.05, duration: 2.5, ease: 'power1.inOut' }, `scene-${index}`);
+        }
+      }
+
+      // Add a generous pause for the scene to play out before transitioning
+      masterTl.to({}, { duration: 2 }); // Duration for scene hold
+      
+      // Fade out the current layer and text, preparing for the next scene
+      if (index < storyConfig.scenes.length - 1) {
+        masterTl.to(layer, { opacity: 0, duration: 1.5 }, `scene-${index}+=4`); // Fade out after a longer delay
+        masterTl.to(textContainer, { opacity: 0, duration: 1.5 }, "<"); // Text fades out with image
+      }
+    });
+
+    // Ensure the very last elements fade out
+    masterTl.to(layers[layers.length - 1], { opacity: 0, duration: 1.5 }, `scene-${storyConfig.scenes.length - 1}+=4`);
+    masterTl.to(textContainers[textContainers.length - 1], { opacity: 0, duration: 1.5 }, "<");
+
+
+    // CTA animation
+    const ctaTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: ctaSection,
+        start: "top 80%",
+        toggleActions: "play none none none",
+      }
+    });
+    ctaTl.from(ctaSection, { opacity: 0, scale: 0.9, duration: 1 });
+    ctaTl.call(() => {
+      if (!ctaSection.dataset.confettiLaunched) {
+        launchConfetti();
+        ctaSection.dataset.confettiLaunched = "true";
+      }
+    }, null, ">-0.5");
+
+    function launchConfetti() {
+      const container = document.getElementById('confetti-container');
+      if (!container) return;
+      const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4', '#FFFFFF'];
+      for (let i = 0; i < 150; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'absolute';
+        confetti.style.width = '10px';
+        confetti.style.height = '15px';
+        confetti.style.opacity = 0;
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = `-20%`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        container.appendChild(confetti);
+        gsap.to(confetti, {
+          y: '120vh', x: `random(-200, 200)`, rotation: `random(360, 720)`, scale: `random(0.5, 1.5)`,
+          opacity: 1, duration: `random(3, 6)`, delay: Math.random() * 2,
+          onComplete: () => confetti.remove()
+        });
+      }
     }
-  });
 
-  // Create timeline for all scenes
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: ".scroll-area",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: true,
-      pin: ".story-wrapper"
-    }
-  });
-
-  sections.forEach((section, i) => {
-    const nextBG = section.dataset.bg;
-    const illustration = section.querySelector(".illustration");
-    const headline = section.querySelector(".headline");
-
-    tl.to(wrapper, { background: nextBG, duration: 0.5 });
-    tl.to(section, { opacity: 1, y: 0, duration: 0.8 }, "<");
-    tl.to(illustration, { opacity: 1, scale: 1.2, duration: 0.6 }, "<");
-    tl.to({}, { duration: 1 }); // Pause for viewing
-    tl.to(section, { opacity: 0, y: -100, duration: 0.8 });
-  });
-
-  // Reveal CTA on last scene
-  tl.to(sections[sections.length - 1].querySelector(".cta"), {
-    display: "block",
-    opacity: 1,
-    duration: 1
-  });
-</script>
+    // Scroll down indicator click
+    document.getElementById('scroll-indicator').addEventListener('click', () => {
+      // Scroll by one viewport height, allowing the user to progress through scenes
+      window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+    });
+  </script>
 </body>
 </html>

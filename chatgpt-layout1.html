@@ -24,10 +24,23 @@
       text-shadow: 0 4px 15px rgba(0,0,0,0.7);
       opacity: 0;
     }
+    .subtitle-container {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.4em 0.8em;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 0.4em;
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      opacity: 0;
+      white-space: nowrap;
+    }
     .text-container .char {
       display: inline-block;
     }
-    /* Scroll down indicator animation */
     .scroll-indicator {
       animation: bounce 1.5s infinite;
     }
@@ -40,7 +53,6 @@
 <body class="bg-black text-white overflow-x-hidden">
 
   <div id="pin-container" class="relative w-full h-screen overflow-hidden">
-    <!-- Scroll Down Indicator -->
     <div id="scroll-indicator" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50 text-white opacity-80 cursor-pointer">
       <svg xmlns="http://www.w3.org/2000/svg" class="scroll-indicator w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -61,7 +73,6 @@
     gsap.registerPlugin(ScrollTrigger);
 
     const animations = {
-      // Existing text effects
       slideUp: chars => gsap.from(chars, { y: 60, opacity: 0, stagger: 0.03, ease: 'power2.out' }),
       scaleIn: chars => gsap.from(chars, { scale: 0.5, opacity: 0, stagger: 0.04, ease: 'back.out(1.7)' }),
       fadeIn: chars => gsap.from(chars, { opacity: 0, stagger: 0.05, ease: 'power1.inOut' }),
@@ -77,8 +88,6 @@
         tl.set(container, { scale: 4.5 }, sceneDuration);
         return tl;
       },
-
-      // Existing image effect for triple bounce
       tripleBounceImage: (layer, sceneDuration) => {
         const tl = gsap.timeline();
         tl.addLabel("jump1", sceneDuration / 3);
@@ -89,20 +98,12 @@
         tl.set(layer, { scale: 1.6 }, sceneDuration);
         return tl;
       },
-
-      /* =====================
-         NEW TEXT EFFECTS
-      ====================== */
-      rotateIn: chars => gsap.from(chars, { rotationX: 90, opacity: 0, stagger: 0.05, ease: 'back.out(1.7)' }),
-      skewPop: chars => gsap.from(chars, { skewY: 20, opacity: 0, scale: 0.8, stagger: 0.05, ease: 'elastic.out(1, 0.5)' }),
-      wave: chars => gsap.from(chars, { y: i => Math.sin(i * 0.5) * 30, opacity: 0, stagger: 0.04, ease: 'power2.out' }),
-
-      /* =====================
-         NEW IMAGE EFFECTS
-      ====================== */
-      zoomRotateImage: layer => gsap.fromTo(layer, { scale: 0.8, rotation: -10 }, { scale: 1.2, rotation: 0, duration: 2, ease: 'power2.inOut' }),
-      fadePanImage: layer => gsap.fromTo(layer, { opacity: 0, x: -100 }, { opacity: 1, x: 0, duration: 2, ease: 'power2.inOut' }),
-      pulseImage: layer => gsap.to(layer, { scale: 1.05, repeat: 3, yoyo: true, duration: 0.5, ease: 'power1.inOut' })
+      subtitle: container => {
+        return gsap.fromTo(container, 
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
+        );
+      }
     };
 
     const storyConfig = {
@@ -111,8 +112,8 @@
         { text: "A burst of motivation.", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop", animation: "scaleIn", position: { top: "20%", left: "50%" } },
         { text: "He worked harder and harder.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop", animation: "fadeIn", position: { top: "80%", left: "50%" } },
         { text: "Again", image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop", animation: "tripleBounce", position: { top: "50%", left: "50%" } },
-        { text: "He found the secret.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", animation: "rotateIn", position: { top: "30%", left: "80%" } },
-        { text: "Start your journey.", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop", animation: "skewPop", position: { top: "60%", left: "25%" } }
+        { text: "This is a subtitle scene", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", animation: "subtitle" },
+        { text: "Start your journey.", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop", animation: "slideUp", position: { top: "60%", left: "25%" } }
       ]
     };
 
@@ -128,12 +129,19 @@
       pinContainer.appendChild(layer);
       layers.push(layer);
 
-      const textContainer = document.createElement('div');
-      textContainer.className = 'text-container text-[clamp(2rem,5vw,4rem)]';
-      textContainer.style.top = scene.position.top;
-      textContainer.style.left = scene.position.left;
-      textContainer.style.transform = "translate(-50%, -50%)";
-      textContainer.innerHTML = scene.text.split("").map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join("");
+      let textContainer;
+      if (scene.animation === "subtitle") {
+        textContainer = document.createElement('div');
+        textContainer.className = 'subtitle-container';
+        textContainer.innerHTML = scene.text;
+      } else {
+        textContainer = document.createElement('div');
+        textContainer.className = 'text-container text-[clamp(2rem,5vw,4rem)]';
+        textContainer.style.top = scene.position.top;
+        textContainer.style.left = scene.position.left;
+        textContainer.style.transform = "translate(-50%, -50%)";
+        textContainer.innerHTML = scene.text.split("").map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join("");
+      }
       pinContainer.appendChild(textContainer);
       textContainers.push(textContainer);
     });
@@ -158,18 +166,14 @@
         const sceneDuration = 3;
         masterTl.add(animations.tripleBounce(chars, textContainer, sceneDuration), "<");
         masterTl.add(animations.tripleBounceImage(layer, sceneDuration), "<");
-      } else {
+      } 
+      else if (scene.animation === "subtitle") {
+        masterTl.add(animations.subtitle(textContainer), "<");
+      }
+      else {
         masterTl.to(textContainer, { opacity: 1, duration: 0.1 }, "<");
         masterTl.add(animations[scene.animation](chars), "<");
-
-        // Example: new image effects applied selectively
-        if (scene.animation === "rotateIn") {
-          masterTl.add(animations.zoomRotateImage(layer), "<");
-        } else if (scene.animation === "skewPop") {
-          masterTl.add(animations.fadePanImage(layer), "<");
-        } else {
-          masterTl.to(layer, { scale: 1.2, duration: 2 }, "<");
-        }
+        masterTl.to(layer, { scale: 1.2, duration: 2 }, "<");
       }
 
       masterTl.to({}, { duration: 0.5 });
@@ -182,7 +186,6 @@
     masterTl.to(layers[layers.length - 1], { opacity: 0, duration: 1 });
     masterTl.to(textContainers[textContainers.length - 1], { opacity: 0, duration: 1 }, "<");
 
-    // CTA animation
     const ctaTl = gsap.timeline({
       scrollTrigger: {
         trigger: ctaSection,
@@ -221,7 +224,6 @@
       }
     }
 
-    // Scroll down indicator click
     document.getElementById('scroll-indicator').addEventListener('click', () => {
       window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
     });

@@ -6,7 +6,7 @@
   <title>Hibo – The Habit Odyssey (Tailwind Refactor)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html, body { margin: 0; padding: 0; }
+    html, body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; } /* Added Inter font */
     .layer {
       position: absolute;
       top: 0; left: 0;
@@ -35,6 +35,16 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(6px); }
     }
+
+    /* Custom styles for image animation (beyond inline Tailwind) */
+    .image-parallax-left {
+        transform: translateZ(0); /* Ensure hardware acceleration */
+        transition: transform 0.5s ease-out;
+    }
+    .image-parallax-right {
+        transform: translateZ(0);
+        transition: transform 0.5s ease-out;
+    }
   </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden">
@@ -50,8 +60,8 @@
   
   <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#0F0F23] via-[#1A1A2E] to-[#16213E]">
     <h2 class="text-[clamp(2.5rem,6vw,5rem)] mb-4 text-center font-bold">Start Your Journey</h2>
-    <p class="text-[clamp(1rem,2vw,1.2rem)] max-w-xl mb-8 text-center">Transform your life through the power of small, consistent habits. Every expert was once a beginner.</p>
-    <a href="#" id="cta-button" class="px-8 py-4 text-lg font-bold text-black bg-yellow-400 rounded-full transition-transform hover:scale-105">Begin Your Transformation 🚀</a>
+    <p class="text-[clamp(1rem,2vw,1.2rem)] max-w-xl mb-8 text-center px-4">Transform your life through the power of small, consistent habits. Every expert was once a beginner.</p>
+    <a href="#" id="cta-button" class="px-8 py-4 text-lg font-bold text-black bg-yellow-400 rounded-full transition-transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300">Begin Your Transformation 🚀</a>
     <div id="confetti-container" class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-50"></div>
   </section>
 
@@ -61,7 +71,7 @@
     gsap.registerPlugin(ScrollTrigger);
 
     const animations = {
-      // Existing text effects
+      // Original ones
       slideUp: chars => gsap.from(chars, { y: 60, opacity: 0, stagger: 0.03, ease: 'power2.out' }),
       scaleIn: chars => gsap.from(chars, { scale: 0.5, opacity: 0, stagger: 0.04, ease: 'back.out(1.7)' }),
       fadeIn: chars => gsap.from(chars, { opacity: 0, stagger: 0.05, ease: 'power1.inOut' }),
@@ -77,8 +87,6 @@
         tl.set(container, { scale: 4.5 }, sceneDuration);
         return tl;
       },
-
-      // Existing image effect for triple bounce
       tripleBounceImage: (layer, sceneDuration) => {
         const tl = gsap.timeline();
         tl.addLabel("jump1", sceneDuration / 3);
@@ -90,29 +98,37 @@
         return tl;
       },
 
-      /* =====================
-         NEW TEXT EFFECTS
-      ====================== */
-      rotateIn: chars => gsap.from(chars, { rotationX: 90, opacity: 0, stagger: 0.05, ease: 'back.out(1.7)' }),
-      skewPop: chars => gsap.from(chars, { skewY: 20, opacity: 0, scale: 0.8, stagger: 0.05, ease: 'elastic.out(1, 0.5)' }),
-      wave: chars => gsap.from(chars, { y: i => Math.sin(i * 0.5) * 30, opacity: 0, stagger: 0.04, ease: 'power2.out' }),
-
-      /* =====================
-         NEW IMAGE EFFECTS
-      ====================== */
-      zoomRotateImage: layer => gsap.fromTo(layer, { scale: 0.8, rotation: -10 }, { scale: 1.2, rotation: 0, duration: 2, ease: 'power2.inOut' }),
-      fadePanImage: layer => gsap.fromTo(layer, { opacity: 0, x: -100 }, { opacity: 1, x: 0, duration: 2, ease: 'power2.inOut' }),
-      pulseImage: layer => gsap.to(layer, { scale: 1.05, repeat: 3, yoyo: true, duration: 0.5, ease: 'power1.inOut' })
+      // New reusable text effects
+      fadeUp: chars => gsap.from(chars, { y: 40, opacity: 0, stagger: 0.05, ease: 'power3.out' }),
+      zoomRotate: chars => gsap.from(chars, { scale: 0, rotation: 180, opacity: 0, stagger: 0.06, ease: 'back.out(2)' }),
+      typeWriter: chars => gsap.from(chars, { opacity: 0, duration: 0.05, stagger: 0.05, ease: 'none' }),
+      colorPulse: chars => gsap.fromTo(chars, { color: '#fff' }, { color: '#FFD700', repeat: 3, yoyo: true, duration: 0.2, stagger: 0.05 }),
+      blurReveal: chars => gsap.from(chars, { filter: 'blur(10px)', opacity: 0, stagger: 0.04, ease: 'power2.out' }),
+      bounceIn: chars => gsap.from(chars, { y: -200, opacity: 0, ease: 'bounce.out', stagger: 0.05 }),
+      rotateXIn: chars => gsap.from(chars, { rotationX: -90, opacity: 0, transformOrigin: 'center center', stagger: 0.03, ease: 'power3.out' }),
+      slideDown: chars => gsap.from(chars, { y: -60, opacity: 0, stagger: 0.03, ease: 'power2.out' }),
+      
+      // New reusable image effects
+      imageZoomPan: (layer) => gsap.to(layer, { scale: 1.15, x: '-5%', duration: 3, ease: 'power1.inOut' }),
+      imageRotateScale: (layer) => gsap.to(layer, { rotation: '5deg', scale: 1.1, duration: 3, ease: 'power2.inOut' }),
+      imageParallaxScroll: (layer, direction) => {
+        if (direction === 'left') {
+          return gsap.to(layer, { x: '-10%', ease: 'none', scrollTrigger: { trigger: layer, start: 'top bottom', end: 'bottom top', scrub: true } });
+        } else {
+          return gsap.to(layer, { x: '10%', ease: 'none', scrollTrigger: { trigger: layer, start: 'top bottom', end: 'bottom top', scrub: true } });
+        }
+      }
     };
 
     const storyConfig = {
       scenes: [
-        { text: "This is Hibo.", image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop", animation: "slideUp", position: { top: "50%", left: "50%" } },
-        { text: "A burst of motivation.", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop", animation: "scaleIn", position: { top: "20%", left: "50%" } },
-        { text: "He worked harder and harder.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop", animation: "fadeIn", position: { top: "80%", left: "50%" } },
-        { text: "Again", image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop", animation: "tripleBounce", position: { top: "50%", left: "50%" } },
-        { text: "He found the secret.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", animation: "rotateIn", position: { top: "30%", left: "80%" } },
-        { text: "Start your journey.", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop", animation: "skewPop", position: { top: "60%", left: "25%" } }
+        { text: "This is Hibo.", image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop", animation: "bounceIn", imageAnimation: "imageZoomPan", position: { top: "50%", left: "50%" } },
+        { text: "A burst of motivation.", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop", animation: "rotateXIn", imageAnimation: "imageRotateScale", position: { top: "20%", left: "50%" } },
+        { text: "He worked harder and harder.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop", animation: "blurReveal", imageAnimation: "imageParallaxScroll", imageAnimationDirection: "left", position: { top: "80%", left: "50%" } },
+        { text: "Again", image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop", animation: "tripleBounce", imageAnimation: "tripleBounceImage", position: { top: "50%", left: "50%" } },
+        { text: "He found the secret.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", animation: "zoomRotate", imageAnimation: "imageZoomPan", position: { top: "30%", left: "80%" } },
+        { text: "Start your journey.", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop", animation: "slideDown", imageAnimation: "imageRotateScale", position: { top: "60%", left: "25%" } },
+        { text: "The Habit Odyssey.", image: "https://images.unsplash.com/photo-1605634509428-f6048d0a8f8e?w=1920&h=1080&fit=crop", animation: "typeWriter", imageAnimation: "imageParallaxScroll", imageAnimationDirection: "right", position: { top: "50%", left: "50%" } }
       ]
     };
 
@@ -143,7 +159,7 @@
         trigger: pinContainer,
         pin: true,
         scrub: 1,
-        end: "+=12000"
+        end: "+=14000" // Increased end to accommodate more scenes/animations
       }
     });
 
@@ -152,33 +168,41 @@
       const textContainer = textContainers[index];
       const chars = textContainer.querySelectorAll('.char');
 
-      masterTl.to(layer, { opacity: 1, duration: 1 }, "+=0");
+      masterTl.to(layer, { opacity: 1, duration: 1 }, "+=0"); // Fade in the image layer
 
       if (scene.animation === "tripleBounce") {
         const sceneDuration = 3;
         masterTl.add(animations.tripleBounce(chars, textContainer, sceneDuration), "<");
         masterTl.add(animations.tripleBounceImage(layer, sceneDuration), "<");
       } else {
-        masterTl.to(textContainer, { opacity: 1, duration: 0.1 }, "<");
-        masterTl.add(animations[scene.animation](chars), "<");
+        masterTl.to(textContainer, { opacity: 1, duration: 0.1 }, "<"); // Fade in text container
+        masterTl.add(animations[scene.animation](chars), "<"); // Add text animation
 
-        // Example: new image effects applied selectively
-        if (scene.animation === "rotateIn") {
-          masterTl.add(animations.zoomRotateImage(layer), "<");
-        } else if (scene.animation === "skewPop") {
-          masterTl.add(animations.fadePanImage(layer), "<");
+        // Apply general image animation if specified
+        if (scene.imageAnimation && scene.imageAnimation !== "tripleBounceImage") {
+          if (scene.imageAnimation === "imageParallaxScroll") {
+            // Parallax scroll is handled by ScrollTrigger internally, so we don't add it directly to masterTl here.
+            // Instead, we just ensure the layer is ready for it.
+          } else {
+            masterTl.add(animations[scene.imageAnimation](layer), "<");
+          }
         } else {
+          // Default image animation if not tripleBounce and no other specific one
           masterTl.to(layer, { scale: 1.2, duration: 2 }, "<");
         }
       }
 
-      masterTl.to({}, { duration: 0.5 });
+      // Add a slight pause before the next scene starts or fades out
+      masterTl.to({}, { duration: 0.5 }); 
+      
+      // Fade out the current layer and text, unless it's the last scene
       if (index < storyConfig.scenes.length - 1) {
         masterTl.to(layer, { opacity: 0, duration: 1 });
         masterTl.to(textContainer, { opacity: 0, duration: 1 }, "<");
       }
     });
 
+    // Ensure the very last elements fade out
     masterTl.to(layers[layers.length - 1], { opacity: 0, duration: 1 });
     masterTl.to(textContainers[textContainers.length - 1], { opacity: 0, duration: 1 }, "<");
 
@@ -223,7 +247,9 @@
 
     // Scroll down indicator click
     document.getElementById('scroll-indicator').addEventListener('click', () => {
-      window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+      // Scroll by one viewport height
+      window.scrollBy({ top: window.innerHeight, behavior: 'smooth' }); 
+      // Optionally, you can also scroll directly to the next scene if you calculate its scroll position
     });
   </script>
 </body>
