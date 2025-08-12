@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Perplexity -- Hibo – The Habit Odyssey (Cinematic)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'playfair': ['Playfair Display', 'serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'shake': 'shake 0.8s cubic-bezier(.36,.07,.19,.97) both infinite',
+                        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
+                        'flicker': 'flicker 1.5s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+                        },
+                        heartbeat: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.05)' },
+                        },
+                        flicker: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.7' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom CSS for advanced effects not covered by Tailwind */
+        .text-shadow-dramatic { text-shadow: 0 4px 20px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.6); }
+        .text-shadow-neon { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px currentColor; }
+        .text-shadow-fire { text-shadow: 0 0 5px #ff6b35, 0 0 10px #ff6b35, 0 0 20px #ff6b35, 0 0 30px #f7931e; }
+        .backdrop-blur-intense { backdrop-filter: blur(12px) saturate(1.2); }
+        .gradient-text { -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .gradient-text-fire { background-image: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02); }
+        .gradient-text-ocean { background-image: linear-gradient(135deg, #667eea, #764ba2, #89f7fe); }
+        .gradient-text-success { background-image: linear-gradient(135deg, #84fab0, #8fd3f4, #a8edea); }
+        .vignette::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%); pointer-events: none; }
+    </style>
+</head>
+<body class="font-poppins bg-black text-white overflow-x-hidden">
+    <div id="confetti-container" class="absolute inset-0 overflow-hidden pointer-events-none z-50"></div>
+
+
+    <div id="pin-container" class="w-full h-screen relative overflow-hidden">
+        <!-- Scenes will be dynamically created here -->
+    </div>
+    
+    <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900">
+        <div class="content-wrapper opacity-0 text-center px-4 max-w-4xl mx-auto relative z-10">
+            <h2 class="font-playfair text-5xl md:text-7xl lg:text-8xl font-black mb-8 gradient-text gradient-text-success animate-heartbeat">
+                Your Journey Begins
+            </h2>
+            <p class="font-inter text-xl md:text-2xl max-w-3xl mx-auto mb-12 text-emerald-100 leading-relaxed font-light">
+                Every expert was once a beginner.<br/>
+                <span class="text-emerald-300 font-semibold">Your transformation starts with a single step.</span>
+            </p>
+            <a href="#" id="cta-button" 
+               class="inline-block px-12 py-6 text-xl md:text-2xl font-bold text-black bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full 
+                      hover:from-emerald-300 hover:to-teal-300 hover:scale-110 transition-all duration-500 shadow-2xl 
+                      hover:shadow-emerald-400/50 transform hover:-translate-y-1">
+                Begin Transformation ✨
+            </a>
+        </div>
+    </section>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/EasePack.min.js"></script>
+    
+    <script>
+    gsap.registerPlugin(ScrollTrigger, RoughEase);
+    const random = gsap.utils.random;
+
+
+    // --- CINEMATIC STORY CONFIGURATION 🎬 ---
+    const storyConfig = {
+        scenes: [
+            {
+                text: `Meet <span class="font-bold text-blue-300">HIBO</span>`,
+                image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop",
+                textStyle: "font-playfair text-white text-5xl md:text-7xl lg:text-9xl font-black text-shadow-dramatic",
+                containerStyle: "bg-black/60 backdrop-blur-intense rounded-full px-16 py-8 border-4 border-white/20",
+                textAnimation: "gentle-reveal",
+                backgroundEffect: "slow-zoom-in",
+                duration: 2000 // duration in ms for scroll
+            },
+            {
+                text: `A <span class="gradient-text gradient-text-fire animate-flicker">BURST</span> of<br/><span class="text-7xl">MOTIVATION</span>`,
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop",
+                textStyle: "font-inter text-white text-4xl md:text-6xl lg:text-8xl font-black text-shadow-fire",
+                containerStyle: "bg-gradient-to-br from-orange-500/30 to-red-500/40 backdrop-blur-intense rounded-3xl p-12 border-2 border-orange-400/50 animate-heartbeat",
+                textAnimation: "explosive-bounce",
+                backgroundEffect: "energy-pulse",
+                duration: 1500
+            },
+            {
+                text: `He worked<br/><span class="text-red-500">HARDER</span><br/>and <span class="text-red-600 animate-shake">HARDER</span>`,
+                image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop",
+                textStyle: "font-inter text-white text-3xl md:text-5xl lg:text-7xl font-black text-shadow-dramatic",
+                containerStyle: "bg-red-900/50 backdrop-blur-intense rounded-xl p-10 border-l-8 border-red-500",
+                textAnimation: "building-intensity",
+                backgroundEffect: "increasing-shake",
+                duration: 2500
+            },
+            {
+                text: `Until he<br/><span class="text-gray-400 opacity-50">couldn't</span><br/><span class="text-gray-600 opacity-30 text-4xl">anymore...</span>`,
+                image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop",
+                textStyle: "font-playfair text-gray-300 text-3xl md:text-5xl lg:text-7xl font-light",
+                containerStyle: "bg-gray-900/70 backdrop-blur-intense rounded-lg p-8 border border-gray-700/30",
+                textAnimation: "slow-fade-in",
+                backgroundEffect: "desaturate-darken",
+                vignette: true,
+                duration: 2000
+            },
+            {
+                text: `Then he discovered<br/><span class="gradient-text gradient-text-ocean text-shadow-neon">THE SECRET</span>`,
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop",
+                textStyle: "font-playfair text-white text-4xl md:text-6xl lg:text-8xl font-bold",
+                containerStyle: "bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-cyan-500/30 backdrop-blur-intense rounded-full p-16 border-2 border-cyan-400/50 animate-pulse-slow",
+                textAnimation: "light-revelation",
+                backgroundEffect: "light-breakthrough",
+                duration: 2000
+            },
+            {
+                text: `<span class="gradient-text gradient-text-success text-shadow-neon">Your turn</span><br/><span class="text-7xl font-black gradient-text gradient-text-success animate-pulse-slow">YOUR STORY</span>`,
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop",
+                textStyle: "font-inter text-white text-4xl md:text-6xl lg:text-8xl font-black",
+                containerStyle: "bg-gradient-to-br from-emerald-500/40 via-teal-500/30 to-cyan-500/40 backdrop-blur-intense rounded-3xl p-20 border-4 border-emerald-400/60 animate-float",
+                textAnimation: "epic-cascade",
+                backgroundEffect: "triumphant-zoom",
+                duration: 2500,
+                confetti: true
+            }
+        ]
+    };
+
+
+    const pinContainer = document.getElementById('pin-container');
+    const ctaSection = document.getElementById('cta-section');
+
+
+    // --- DYNAMICALLY BUILD SCENES ---
+    storyConfig.scenes.forEach((scene, index) => {
+        const sceneEl = document.createElement('div');
+        sceneEl.className = 'scene-container absolute inset-0 w-full h-screen';
+        sceneEl.style.zIndex = index;
+
+
+        const bgEl = document.createElement('div');
+        bgEl.className = 'bg-layer absolute inset-0 w-full h-screen bg-cover bg-center';
+        bgEl.style.backgroundImage = `url('${scene.image}')`;
+        
+        const textWrapperEl = document.createElement('div');
+        textWrapperEl.className = 'absolute inset-0 flex items-center justify-center';
+
+
+        const textContainerEl = document.createElement('div');
+        textContainerEl.className = `text-container text-center ${scene.containerStyle}`;
+        
+        const textEl = document.createElement('div');
+        textEl.className = `text-content ${scene.textStyle}`;
+        textEl.innerHTML = scene.text;
+
+
+        if (scene.vignette) {
+            bgEl.classList.add('vignette');
+        }
+
+
+        textContainerEl.appendChild(textEl);
+        textWrapperEl.appendChild(textContainerEl);
+        sceneEl.appendChild(bgEl);
+        sceneEl.appendChild(textWrapperEl);
+        pinContainer.appendChild(sceneEl);
+    });
+
+
+    // --- ANIMATION FUNCTIONS ---
+
+    const textAnimations = {
+        'gentle-reveal': (el) => gsap.from(el, { scale: 0.8, opacity: 0, duration: 1, ease: 'power2.out' }),
+        'explosive-bounce': (el) => gsap.from(el, { scale: 0, rotation: -180, opacity: 0, duration: 1, ease: 'back.out(1.7)' }),
+        'building-intensity': (el) => gsap.from(el, { x: -100, opacity: 0, duration: 1, ease: 'power2.out' }),
+        'slow-fade-in': (el) => gsap.from(el, { opacity: 0, y: 20, duration: 1.5, ease: 'power1.inOut' }),
+        'light-revelation': (el) => gsap.from(el, { scale: 0.5, opacity: 0, filter: 'brightness(3)', duration: 1.2, ease: 'power2.out' }),
+        'epic-cascade': (el) => gsap.from(el, { y: -200, rotation: 15, opacity: 0, scale: 0.5, duration: 1.2, ease: 'power2.out' }),
+    };
+
+
+    const backgroundEffects = {
+        'slow-zoom-in': (el, dur) => gsap.to(el, { scale: 1.1, duration: dur, ease: 'power1.in' }),
+        'energy-pulse': (el, dur) => gsap.to(el, { scale: 1.2, filter: 'saturate(1.5)', duration: dur, ease: 'power1.in' }),
+        'increasing-shake': (el, dur) => gsap.to(el, {
+            x: random(-15, 15, 1),
+            y: random(-10, 10, 1),
+            duration: dur,
+            ease: 'rough({ strength: 2, points: 20, taper: "both", randomize: true, clamp: false})'
+        }),
+        'desaturate-darken': (el, dur) => gsap.to(el, { scale: 1.05, filter: 'saturate(0.1) brightness(0.5)', duration: dur, ease: 'power1.in' }),
+        'light-breakthrough': (el, dur) => gsap.to(el, { scale: 1.15, filter: 'saturate(1.2) brightness(1.3)', duration: dur, ease: 'power1.in' }),
+        'triumphant-zoom': (el, dur) => gsap.to(el, { scale: 1.25, filter: 'saturate(1.3) brightness(1.1)', duration: dur, ease: 'power1.in' }),
+    };
+
+
+    // --- SETUP MASTER TIMELINE ---
+
+    const totalDuration = storyConfig.scenes.reduce((acc, scene) => acc + scene.duration, 0) / 1000; // convert total ms to seconds
+    const masterTl = gsap.timeline({
+        scrollTrigger: {
+            trigger: pinContainer,
+            pin: true,
+            scrub: 1,
+            end: `+=${totalDuration}`
+        }
+    });
+
+
+    const scenes = document.querySelectorAll('.scene-container');
+    let accumulatedTime = 0;
+
+
+    scenes.forEach((sceneEl, index) => {
+        const config = storyConfig.scenes[index];
+        const sceneDuration = config.duration / 1000; // ms to seconds
+        const bg = sceneEl.querySelector('.bg-layer');
+        const text = sceneEl.querySelector('.text-container');
+        
+        // Fade in scene
+        masterTl.fromTo(sceneEl, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, accumulatedTime);
+
+
+        // Text animation
+        if (textAnimations[config.textAnimation]) {
+            masterTl.add(textAnimations(text), accumulatedTime + 0.2);
+        }
+
+        // Background effect animation
+        if (backgroundEffects[config.backgroundEffect]) {
+            masterTl.add(backgroundEffects(bg, sceneDuration), accumulatedTime);
+        }
+
+
+        // Launch confetti if defined for this scene
+        if (config.confetti) {
+            masterTl.call(launchSceneConfetti, [], accumulatedTime + sceneDuration * 0.6);
+        }
+
+
+        // Fade out scene except last one
+        if (index < scenes.length - 1) {
+            masterTl.to(sceneEl, { autoAlpha: 0, duration: 0.4 }, accumulatedTime + sceneDuration - 0.4);
+        }
+        
+        accumulatedTime += sceneDuration;
+    });
+
+
+    // --- CTA SECTION ANIMATION ---
+
+    const ctaContent = ctaSection.querySelector('.content-wrapper');
+    gsap.from(ctaContent, {
+        opacity: 0,
+        y: 100,
+        duration: 1,
+        scrollTrigger: {
+            trigger: ctaSection,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+            once: true, // Fire only once
+            onEnter: () => launchCTAConfetti(),
+        }
+    });
+
+
+    // --- CONFETTI FUNCTIONS ---
+    const confettiContainer = document.getElementById('confetti-container');
+
+    function launchSceneConfetti() {
+        if (!confettiContainer) return;
+        const colors = ['#84fab0', '#8fd3f4', '#a8edea'];
+        for (let i = 0; i < 50; i++) createParticle('✨', colors, 0.5, 1.5);
+    }
+
+    function launchCTAConfetti() {
+        if (!confettiContainer) return;
+        const colors = ['#10B981', '#06B6D4', '#8B5CF6', '#F59E0B', '#FFFFFF'];
+        const shapes = ['✨', '🎉', '🚀', '⭐', '💫'];
+        for (let i = 0; i < 150; i++) createParticle(shapes[i % shapes.length], colors, 4, 8);
+    }
+
+    function createParticle(shape, colors, minDur, maxDur) {
+        const p = document.createElement('div');
+        p.className = 'absolute text-xl';
+        p.style.left = `${random(0, 100)}%`;
+        p.style.top = `${random(10, 90)}%`;
+        p.style.color = random(colors);
+        p.innerHTML = shape;
+        confettiContainer.appendChild(p);
+
+        gsap.fromTo(p, 
+            { opacity: 0, scale: 0 }, 
+            {
+                opacity: 1,
+                scale: random(0.5, 1.5),
+                duration: 0.5,
+                ease: 'power2.out'
+            }
+        );
+
+        gsap.to(p, {
+            y: random(-200, 200),
+            x: random(-200, 200),
+            rotation: random(-360, 360),
+            scale: 0,
+            opacity: 0,
+            duration: random(minDur, maxDur),
+            ease: 'power2.in',
+            delay: 0.5,
+            onComplete: () => p.remove()
+        });
+    }
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hibo — Enhanced Dynamic Storyboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&family=Inter:wght@300;600;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .char { display: inline-block; }
+    .word { display: inline-block; margin-right: 0.2em; }
+    
+    .fade-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(45deg, #000, #0a0a0a, #000);
+      opacity: 0; z-index: 50; pointer-events: none;
+    }
+    
+    .layer {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      opacity: 0; transform-origin: center;
+      filter: brightness(0.75) contrast(1.1);
+      transition: filter 0.3s ease;
+    }
+    
+    /* Enhanced text shadows */
+    .text-glow { text-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
+    .text-fire { text-shadow: 0 0 10px #ff6b35, 0 0 20px #ff6b35, 0 0 30px #ff6b35; }
+    .text-ice { text-shadow: 0 0 10px #00bfff, 0 0 20px #00bfff, 0 0 30px #87ceeb; }
+    .text-deep { text-shadow: 0 4px 8px rgba(0,0,0,0.8), 0 8px 16px rgba(0,0,0,0.6); }
+    
+    /* Particle overlay */
+    .particles {
+      position: absolute; inset: 0; pointer-events: none;
+      background: 
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.1), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.15), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.1), transparent);
+      background-size: 200px 200px;
+      animation: float 20s linear infinite;
+    }
+    
+    @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-200px); } }
+    
+    /* Advanced gradient text */
+    .gradient-fire {
+      background: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02, #ff6b35);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient-shift 3s ease infinite;
+    }
+    
+    .gradient-ocean {
+      background: linear-gradient(135deg, #667eea, #764ba2, #89f7fe, #667eea);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient-shift 4s ease infinite;
+    }
+    
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    
+    /* Glass morphism containers */
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body class="bg-black text-white overflow-x-hidden">
+
+  <!-- Story container -->
+  <div id="pin-container" class="relative w-full h-screen overflow-hidden">
+    <div class="particles"></div>
+  </div>
+  <div id="fade-overlay" class="fade-overlay"></div>
+
+  <!-- Enhanced CTA -->
+  <section id="cta-section" class="relative w-full h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0F0F23] via-[#1A1A2E] to-[#16213E] p-6 text-center overflow-hidden">
+    <div class="particles opacity-30"></div>
+    <div class="glass p-12 max-w-4xl mx-auto relative z-10">
+      <h2 class="text-5xl md:text-7xl font-black mb-6 gradient-ocean">Your Journey Awaits</h2>
+      <p class="text-xl md:text-2xl max-w-2xl mb-8 text-blue-100 font-light leading-relaxed">
+        Transform your life through the power of small, consistent habits.<br/>
+        <span class="font-semibold text-blue-300">Every expert was once a beginner.</span>
+      </p>
+      <a id="cta-button" class="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-black font-bold text-xl hover:scale-110 hover:-translate-y-2 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/50 relative overflow-hidden group">
+        <span class="relative z-10">Begin Your Transformation 🚀</span>
+        <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </a>
+    </div>
+    <div id="confetti-container" class="absolute inset-0 pointer-events-none z-20"></div>
+  </section>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // -------------------------
+    // ENHANCED Animation presets (text)
+    // -------------------------
+    const textEffects = {
+      fadeUp: { y: 60, opacity: 0, stagger: 0.03, ease: "power2.out" },
+      scaleIn: { scale: 0.5, opacity: 0, stagger: 0.04, ease: "back.out(1.7)" },
+      fadeIn: { opacity: 0, stagger: 0.05, ease: "power1.inOut" },
+      
+      // NEW: Advanced effects
+      explosiveEntry: { 
+        scale: 3, 
+        rotation: 180, 
+        opacity: 0, 
+        stagger: { amount: 0.8, from: "center" }, 
+        ease: "back.out(2)" 
+      },
+      
+      typewriter: (chars, tl, layer) => {
+        // Cursor effect
+        const cursor = document.createElement('span');
+        cursor.innerHTML = '|';
+        cursor.className = 'animate-pulse';
+        chars[chars.length - 1].parentNode.appendChild(cursor);
+        
+        tl.set(chars, { opacity: 0 });
+        tl.to(chars, { 
+          opacity: 1, 
+          stagger: 0.08, 
+          ease: "none",
+          onComplete: () => cursor.remove()
+        }, "<");
+      },
+
+      intenseText: (chars, tl, layer) => {
+        tl.from(chars, { scale: 2, opacity: 0, stagger: 0.02, ease: "power4.out" }, "<");
+        tl.to(chars, { scale: 1.1, repeat: 3, yoyo: true, duration: 0.2, stagger: 0.01 }, ">0.1");
+        
+        // Add screen shake to the layer during text reveal
+        tl.to(layer, { 
+          x: "+=15", 
+          y: "+=10", 
+          repeat: 8, 
+          yoyo: true, 
+          duration: 0.05, 
+          ease: "none" 
+        }, "<0.5");
+      },
+      
+      // NEW: Word-based animations
+      wordWave: (chars, tl, layer) => {
+        // Group characters into words
+        const container = chars[0].parentNode;
+        const text = container.textContent;
+        const words = text.split(' ');
+        
+        container.innerHTML = words.map(word => 
+          `<span class="word">${word.split('').map(c => 
+            `<span class="char">${c}</span>`
+          ).join('')}</span>`
+        ).join(' ');
+        
+        const wordElements = container.querySelectorAll('.word');
+        tl.from(wordElements, {
+          y: 100,
+          rotationX: 90,
+          opacity: 0,
+          stagger: 0.2,
+          duration: 0.8,
+          ease: "back.out(1.7)"
+        }, "<");
+      },
+      
+      glitchReveal: (chars, tl, layer) => {
+        // Initial glitch effect
+        tl.set(chars, { opacity: 0 });
+        tl.to(chars, {
+          opacity: 1,
+          x: "random(-20, 20)",
+          y: "random(-10, 10)",
+          stagger: 0.03,
+          duration: 0.1,
+          ease: "none"
+        }, "<");
+        // Settle into position
+        tl.to(chars, {
+          x: 0,
+          y: 0,
+          stagger: 0.02,
+          duration: 0.3,
+          ease: "power2.out"
+        }, ">0.1");
+      }
+    };
+
+    // -------------------------
+    // ENHANCED Image/Layer presets
+    // -------------------------
+    const imageEffects = {
+      none: (layer, tl) => {},
+
+      zoomIn: (layer, tl) => {
+        tl.to(layer, { scale: 1.18, duration: 2, ease: "power1.inOut" }, "<");
+      },
+
+      panRight: (layer, tl) => {
+        tl.fromTo(layer, { backgroundPositionX: "40%" }, { backgroundPositionX: "60%", duration: 2, ease: "none" }, "<");
+      },
+
+      zoomAndPan: (layer, tl) => {
+        tl.to(layer, { scale: 1.25, backgroundPositionY: "60%", duration: 2, ease: "power1.inOut" }, "<");
+      },
+
+      intenseZoomShake: (layer, tl) => {
+        tl.to(layer, { scale: 1.6, duration: 1.2, ease: "power2.inOut" }, "<");
+        tl.to(layer, { x: "+=12", y: "+=8", repeat: 6, yoyo: true, duration: 0.04, ease: "none" }, ">=0.1");
+      },
+      
+      // NEW: Advanced image effects
+      spiralZoom: (layer, tl) => {
+        tl.to(layer, {
+          scale: 1.4,
+          rotation: 15,
+          duration: 2.5,
+          ease: "power2.inOut"
+        }, "<");
+      },
+      
+      pulseGlow: (layer, tl) => {
+        tl.to(layer, {
+          filter: "brightness(1.3) saturate(1.5) contrast(1.2)",
+          duration: 0.8,
+          repeat: 3,
+          yoyo: true,
+          ease: "sine.inOut"
+        }, "<");
+      },
+      
+      matrixRain: (layer, tl) => {
+        // Create digital rain effect
+        const container = layer.parentNode;
+        for (let i = 0; i < 20; i++) {
+          const drop = document.createElement('div');
+          drop.style.cssText = `
+            position: absolute;
+            left: ${Math.random() * 100}%;
+            top: -100px;
+            width: 2px;
+            height: 50px;
+            background: linear-gradient(to bottom, transparent, #00ff00, transparent);
+            opacity: 0;
+          `;
+          container.appendChild(drop);
+          
+          tl.to(drop, {
+            y: window.innerHeight + 100,
+            opacity: 0.7,
+            duration: 2,
+            delay: Math.random() * 1,
+            ease: "none",
+            onComplete: () => drop.remove()
+          }, "<");
+        }
+        
+        tl.to(layer, { 
+          filter: "brightness(0.7) saturate(0.5) hue-rotate(120deg)",
+          duration: 2,
+          ease: "none"
+        }, "<");
+      },
+      
+      fireParticles: (layer, tl) => {
+        const container = layer.parentNode;
+        for (let i = 0; i < 30; i++) {
+          const particle = document.createElement('div');
+          particle.style.cssText = `
+            position: absolute;
+            bottom: ${Math.random() * 200}px;
+            left: ${Math.random() * 100}%;
+            width: ${4 + Math.random() * 8}px;
+            height: ${4 + Math.random() * 8}px;
+            background: radial-gradient(circle, #ff6b35, #f7931e, transparent);
+            border-radius: 50%;
+            opacity: 0;
+          `;
+          container.appendChild(particle);
+          
+          tl.to(particle, {
+            y: -300 - Math.random() * 200,
+            x: `random(-50, 50)`,
+            opacity: 1,
+            scale: 0.3,
+            duration: 2 + Math.random(),
+            delay: Math.random() * 1.5,
+            ease: "none",
+            onComplete: () => particle.remove()
+          }, "<");
+        }
+        
+        tl.to(layer, {
+          filter: "brightness(1.2) saturate(1.3) hue-rotate(-20deg)",
+          duration: 2,
+          ease: "power1.inOut"
+        }, "<");
+      }
+    };
+
+    // -------------------------
+    // ENHANCED Story config with richer styling options
+    // -------------------------
+    const storyConfig = {
+      scenes: [
+        {
+          text: "This is Hibo.",
+          image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop",
+          textEffect: "wordWave",
+          imageEffect: "spiralZoom",
+          textStyle: { 
+            size: "text-6xl md:text-8xl", 
+            color: "text-white text-glow", 
+            position: "items-center justify-center", 
+            width: "max-w-4xl",
+            extraClasses: "font-black tracking-wide"
+          },
+          containerStyle: "glass p-8"
+        },
+        {
+          text: "A burst of motivation.",
+          image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop",
+          textEffect: "explosiveEntry",
+          imageEffect: "fireParticles",
+          textStyle: { 
+            size: "text-5xl md:text-7xl", 
+            color: "gradient-fire text-fire", 
+            position: "items-start justify-start", 
+            width: "max-w-3xl",
+            extraClasses: "font-black ml-12 mt-20"
+          }
+        },
+        {
+          text: "Until he couldn't anymore.",
+          image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop",
+          textEffect: "glitchReveal",
+          imageEffect: "matrixRain",
+          textStyle: { 
+            size: "text-4xl md:text-6xl", 
+            color: "text-red-400 text-deep", 
+            position: "items-center justify-center", 
+            width: "max-w-2xl",
+            extraClasses: "font-light opacity-80"
+          },
+          containerStyle: "bg-red-900/20 backdrop-blur-sm rounded-2xl p-6 border border-red-500/30"
+        },
+        {
+          text: "The secret was revealed.",
+          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop",
+          textEffect: "typewriter",
+          imageEffect: "pulseGlow",
+          textStyle: { 
+            size: "text-5xl md:text-7xl", 
+            color: "gradient-ocean text-ice", 
+            position: "items-center justify-center", 
+            width: "max-w-4xl",
+            extraClasses: "font-bold"
+          },
+          containerStyle: "glass p-12 border-2 border-blue-400/50"
+        }
+      ]
+    };
+
+    // -------------------------
+    // Enhanced DOM builder with container support
+    // -------------------------
+    const pinContainer = document.getElementById("pin-container");
+    const fadeOverlay = document.getElementById("fade-overlay");
+    const layers = [];
+    const textNodes = [];
+
+    storyConfig.scenes.forEach(scene => {
+      const layer = document.createElement("div");
+      layer.className = "layer";
+      layer.style.backgroundImage = `url('${scene.image}')`;
+      pinContainer.appendChild(layer);
+      layers.push(layer);
+
+      const textWrap = document.createElement("div");
+      const containerClasses = scene.containerStyle ? ` ${scene.containerStyle}` : '';
+      textWrap.className = `absolute inset-0 flex ${scene.textStyle.position} text-center font-extrabold ${scene.textStyle.size} ${scene.textStyle.color} ${scene.textStyle.extraClasses || ''} px-6 ${scene.textStyle.width} opacity-0${containerClasses}`;
+      
+      // Enhanced text processing for better character/word handling
+      const processedText = scene.text.split("").map(c => 
+        `<span class="char">${c === " " ? "&nbsp;" : c}</span>`
+      ).join("");
+      
+      textWrap.innerHTML = `<div class="relative z-10">${processedText}</div>`;
+      pinContainer.appendChild(textWrap);
+      textNodes.push({ el: textWrap, textEffect: scene.textEffect, imageEffect: scene.imageEffect });
+    });
+
+    // -------------------------
+    // Enhanced master timeline with smoother transitions
+    // -------------------------
+    const masterTl = gsap.timeline({
+      scrollTrigger: { 
+        trigger: pinContainer, 
+        pin: true, 
+        scrub: 1.2, 
+        end: "+=10000",
+        onUpdate: (self) => {
+          // Dynamic fade overlay opacity based on scroll position
+          const progress = self.progress;
+          const fadeIntensity = Math.sin(progress * Math.PI * textNodes.length) * 0.3;
+          gsap.set(fadeOverlay, { opacity: Math.abs(fadeIntensity) });
+        }
+      }
+    });
+
+    textNodes.forEach((node, i) => {
+      const layer = layers[i];
+      const textEl = node.el;
+      const chars = textEl.querySelectorAll(".char");
+
+      // Enhanced fade transition
+      masterTl.to(fadeOverlay, { opacity: 0, duration: 0.8, ease: "power2.out" });
+
+      // Show layer & text with stagger
+      masterTl.to(layer, { opacity: 1, duration: 1, ease: "power2.out" }, "<0.2");
+      masterTl.to(textEl, { opacity: 1, duration: 0.3, ease: "power1.out" }, "<0.3");
+
+      // Image effect
+      const imgEffectFn = imageEffects[node.imageEffect] || imageEffects.none;
+      imgEffectFn(layer, masterTl);
+
+      // Text effect with error handling
+      const txtPreset = textEffects[node.textEffect] || textEffects.fadeUp;
+      try {
+        if (typeof txtPreset === "function") {
+          txtPreset(chars, masterTl, layer);
+        } else {
+          masterTl.from(chars, txtPreset, "<");
+        }
+      } catch (error) {
+        console.warn(`Text effect '${node.textEffect}' failed, falling back to fadeUp:`, error);
+        masterTl.from(chars, textEffects.fadeUp, "<");
+      }
+
+      // Extended hold time for better pacing
+      masterTl.to({}, { duration: 1.2 });
+
+      // Enhanced fade to black with gradient
+      if (i < textNodes.length - 1) {
+        masterTl.to(fadeOverlay, { opacity: 1, duration: 0.8, ease: "power2.in" });
+        masterTl.set(layer, { 
+          opacity: 0, 
+          scale: 1, 
+          x: 0, 
+          y: 0, 
+          rotation: 0,
+          filter: "brightness(0.75) contrast(1.1)",
+          backgroundPositionX: "50%", 
+          backgroundPositionY: "50%" 
+        });
+        masterTl.set(textEl, { opacity: 0, clearProps: "transform" });
+      }
+    });
+
+    // Final cleanup
+    masterTl.to(fadeOverlay, { opacity: 0, duration: 1, ease: "power2.out" });
+
+    // -------------------------
+    // Enhanced CTA with better timing
+    // -------------------------
+    const cta = document.getElementById("cta-section");
+    const ctaTl = gsap.timeline({
+      scrollTrigger: { 
+        trigger: cta, 
+        start: "top 70%", 
+        toggleActions: "play none none none" 
+      }
+    });
+
+    ctaTl.from(cta.querySelector('.glass'), { 
+      opacity: 0, 
+      scale: 0.8, 
+      y: 50,
+      duration: 1.2, 
+      ease: "back.out(1.7)" 
+    });
+    
+    ctaTl.call(() => { 
+      if (!cta.dataset.confettiLaunched) { 
+        launchEnhancedConfetti(); 
+        cta.dataset.confettiLaunched = "true"; 
+      } 
+    }, null, ">-0.5");
+
+    // -------------------------
+    // Enhanced confetti with variety
+    // -------------------------
+    function launchEnhancedConfetti() {
+      const container = document.getElementById("confetti-container");
+      const colors = ['#FFD700','#FF6347','#00BFFF','#32CD32','#FF69B4','#FFFFFF','#FF4500','#9370DB'];
+      const shapes = ['circle', 'square', 'triangle'];
+      
+      for (let i = 0; i < 150; i++) {
+        const el = document.createElement("div");
+        el.className = "absolute";
+        
+        const size = 6 + Math.random() * 8;
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        
+        el.style.width = `${size}px`;
+        el.style.height = `${size}px`;
+        el.style.left = `${Math.random() * 100}%`;
+        el.style.top = `-15%`;
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.opacity = "0";
+        el.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        if (shape === 'circle') {
+          el.style.borderRadius = '50%';
+        } else if (shape === 'triangle') {
+          el.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+        }
+        
+        // Add sparkle effect to some particles
+        if (Math.random() > 0.7) {
+          el.style.boxShadow = `0 0 ${size}px ${colors[Math.floor(Math.random() * colors.length)]}`;
+        }
+        
+        container.appendChild(el);
+        
+        gsap.to(el, {
+          y: "120vh", 
+          x: `random(-250, 250)`, 
+          rotation: `random(360, 1080)`, 
+          scale: `random(0.4, 1.6)`,
+          opacity: 1, 
+          duration: `random(3.5, 7)`, 
+          delay: Math.random() * 2,
+          ease: "none",
+          onComplete: () => el.remove()
+        });
+      }
+    }
+
+    // -------------------------
+    // Enhanced button interaction
+    // -------------------------
+    document.getElementById("cta-button").addEventListener("click", function(e) {
+      e.preventDefault();
+      
+      // Ripple effect
+      const ripple = document.createElement('div');
+      ripple.style.cssText = `
+        position: absolute; inset: 0;
+        background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+        border-radius: inherit; transform: scale(0); pointer-events: none;
+      `;
+      this.appendChild(ripple);
+      
+      gsap.to(ripple, {
+        scale: 3,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power2.out",
+        onComplete: () => ripple.remove()
+      });
+      
+      // Button animation
+      gsap.timeline()
+        .to(this, { scale: 0.95, duration: 0.1 })
+        .to(this, { scale: 1.1, duration: 0.3, ease: "back.out(3)" })
+        .to(this, { scale: 1, duration: 0.2 });
+      
+      // Extra confetti burst
+      setTimeout(() => launchEnhancedConfetti(), 300);
+      
+      console.log('🚀 Enhanced transformation journey begins!');
+    });
+
+    // -------------------------
+    // Performance monitoring
+    // -------------------------
+    let performanceWarning = false;
+    gsap.ticker.add(() => {
+      if (gsap.ticker.fps < 30 && !performanceWarning) {
+        console.warn('⚠️ Low FPS detected. Consider reducing particle effects for better performance.');
+        performanceWarning = true;
+      }
+    });
+
+    // -------------------------
+    // Enhanced global exposure for easier customization
+    // -------------------------
+    window.__HIBO = { 
+      textEffects, 
+      imageEffects, 
+      storyConfig,
+      // Quick scene adder
+      addScene: (scene, position = -1) => {
+        if (position === -1) {
+          storyConfig.scenes.push(scene);
+        } else {
+          storyConfig.scenes.splice(position, 0, scene);
+        }
+        console.log('✨ Scene added! Reload to see changes.');
+      },
+      // Effect previewer
+      previewEffect: (effectName, type = 'text') => {
+        const effects = type === 'text' ? textEffects : imageEffects;
+        console.log(`${type} effect '${effectName}':`, effects[effectName]);
+      }
+    };
+
+    console.log('🎬 Enhanced Hibo experience loaded! Try: __HIBO.previewEffect("explosiveEntry")');
+  </script>
+</body>
+</html>

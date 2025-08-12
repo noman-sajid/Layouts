@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hibo – The Habit Odyssey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'poppins': ['Poppins', 'sans-serif'],
+            'playfair': ['Playfair Display', 'serif'],
+            'inter': ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'shake': 'shake 0.5s ease-in-out infinite',
+            'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
+            'flicker': 'flicker 0.15s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '25%': { transform: 'translateX(-5px)' },
+              '75%': { transform: 'translateX(5px)' },
+            },
+            heartbeat: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.05)' },
+            },
+            flicker: {
+              '0%': { opacity: '1' },
+              '100%': { opacity: '0.8' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .text-shadow-dramatic { text-shadow: 0 8px 32px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.8); }
+    .text-shadow-neon { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor; }
+    .text-shadow-fire { text-shadow: 0 0 5px #ff6b35, 0 0 10px #ff6b35, 0 0 15px #ff6b35, 0 0 20px #ff6b35; }
+    .backdrop-blur-intense { backdrop-filter: blur(12px) saturate(1.5); }
+    .gradient-text-fire {
+      background: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-text-ocean {
+      background: linear-gradient(135deg, #667eea, #764ba2, #89f7fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-text-success {
+      background: linear-gradient(135deg, #84fab0, #8fd3f4, #a8edea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-text-purple {
+      background: linear-gradient(135deg, #a855f7, #ec4899, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .cinematic-bars::before,
+    .cinematic-bars::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+      z-index: 5;
+    }
+    .cinematic-bars::before { top: 0; }
+    .cinematic-bars::after { 
+      bottom: 0; 
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    }
+  </style>
+</head>
+<body class="font-poppins bg-black text-white overflow-x-hidden">
+
+  <div id="pin-container" class="w-full h-screen relative overflow-hidden">
+    <!-- Sections will be dynamically created here -->
+  </div>
+ 
+  <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 cinematic-bars">
+    <div class="absolute inset-0 bg-gradient-radial from-transparent via-emerald-500/5 to-cyan-500/10"></div>
+    <div class="text-center px-4 max-w-6xl mx-auto relative z-10">
+      <h2 class="font-playfair text-5xl md:text-7xl lg:text-8xl font-black mb-8 gradient-text-success animate-heartbeat">
+        Your Journey Begins
+      </h2>
+      <p class="font-inter text-xl md:text-2xl lg:text-3xl max-w-3xl mx-auto mb-12 text-emerald-100 leading-relaxed font-light">
+        Every master was once a disaster. Every expert was once a beginner.<br/>
+        <span class="text-emerald-300 font-semibold">Your transformation starts with a single step.</span>
+      </p>
+      <a href="#" id="cta-button" 
+         class="inline-block px-12 py-6 text-xl md:text-2xl font-bold text-black bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full 
+                hover:from-emerald-300 hover:to-teal-300 hover:scale-110 transition-all duration-500 shadow-2xl 
+                hover:shadow-emerald-400/50 transform hover:-translate-y-2 relative overflow-hidden">
+        Begin Your Transformation ✨
+      </a>
+    </div>
+    <div id="confetti-container" class="absolute inset-0 overflow-hidden pointer-events-none z-50"></div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+ 
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // 🎬 MODULAR STORY CONFIGURATION
+    // Easy to add/remove/modify sections
+    const STORY_SCENES = [
+      {
+        id: 'intro',
+        text: `Meet <span class="font-bold text-blue-300">HIBO</span>`,
+        layout: 'center-focus',
+        image: 'https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop',
+        style: 'font-playfair text-white text-5xl md:text-7xl lg:text-9xl font-black text-shadow-dramatic',
+        container: 'bg-black/60 backdrop-blur-intense rounded-full px-16 py-8 border-4 border-white/20',
+        textEffect: 'gentle-reveal',
+        backgroundEffect: 'slow-zoom',
+        duration: 3,
+        required: true // Cannot be removed
+      },
+      {
+        id: 'struggle',
+        text: `The endless cycle of<br/>
+               <span class="text-red-500 animate-shake">BURNOUT</span><br/>
+               <span class="text-sm opacity-60">trying harder... failing faster...</span>`,
+        layout: 'dramatic-left',
+        image: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop',
+        style: 'font-inter text-gray-300 text-3xl md:text-5xl lg:text-7xl font-light text-shadow-dramatic',
+        container: 'bg-red-900/40 backdrop-blur-intense rounded-xl p-10 border-l-8 border-red-500',
+        textEffect: 'fade-struggle',
+        backgroundEffect: 'darken-desaturate',
+        duration: 3.5
+      },
+      {
+        id: 'discovery',
+        text: `Then he discovered<br/>
+               <span class="gradient-text-ocean text-shadow-neon">THE SECRET</span><br/>
+               <span class="text-2xl text-blue-200">of lasting change</span>`,
+        layout: 'revelation-center',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop',
+        style: 'font-playfair text-white text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-neon',
+        container: 'bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-cyan-500/30 backdrop-blur-intense rounded-full p-16 border-2 border-cyan-400/50 animate-pulse-slow',
+        textEffect: 'light-revelation',
+        backgroundEffect: 'brightness-surge',
+        duration: 3
+      },
+      {
+        id: 'finale',
+        text: `<span class="gradient-text-success text-shadow-neon">Your turn</span><br/>
+               <span class="text-5xl font-black">to write</span><br/>
+               <span class="text-7xl font-black gradient-text-success animate-pulse-slow">YOUR STORY</span>`,
+        layout: 'epic-center',
+        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop',
+        style: 'font-inter text-white text-4xl md:text-6xl lg:text-8xl font-black text-shadow-neon',
+        container: 'bg-gradient-to-br from-emerald-500/40 via-teal-500/30 to-cyan-500/40 backdrop-blur-intense rounded-3xl p-20 border-4 border-emerald-400/60 animate-float',
+        textEffect: 'epic-cascade',
+        backgroundEffect: 'triumphant-zoom',
+        duration: 4,
+        required: true // Cannot be removed
+      }
+    ];
+
+    // 🎭 TEXT LAYOUT SYSTEM
+    const TEXT_LAYOUTS = {
+      'center-focus': 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center',
+      'dramatic-left': 'top-2/3 left-1/4 transform text-left',
+      'revelation-center': 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center',
+      'epic-center': 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center',
+      'top-right': 'top-1/4 right-1/4 transform text-right',
+      'bottom-center': 'bottom-1/4 left-1/2 transform -translate-x-1/2 text-center'
+    };
+
+    // 🎬 TEXT ANIMATION EFFECTS
+    const TEXT_EFFECTS = {
+      'gentle-reveal': (container, timeline) => {
+        timeline.from(container, { 
+          scale: 0.8, 
+          opacity: 0, 
+          duration: 0.8, 
+          ease: 'power2.out' 
+        });
+      },
+      
+      'fade-struggle': (container, timeline) => {
+        const lines = container.innerHTML.split('<br/>');
+        container.innerHTML = lines.map(line => `<div class="block opacity-0">${line}</div>`).join('');
+        const lineElements = container.querySelectorAll('div');
+        timeline.to(lineElements, { 
+          opacity: 1, 
+          y: 0, 
+          stagger: 0.4, 
+          duration: 1,
+          ease: 'power1.inOut'
+        });
+      },
+      
+      'light-revelation': (container, timeline) => {
+        timeline.from(container, { 
+          scale: 0.5, 
+          opacity: 0, 
+          rotationY: 180,
+          duration: 1.2,
+          ease: 'power2.out'
+        });
+      },
+      
+      'epic-cascade': (container, timeline) => {
+        const lines = container.innerHTML.split('<br/>');
+        container.innerHTML = lines.map(line => `<div class="block transform">${line}</div>`).join('');
+        const lineElements = container.querySelectorAll('div');
+        timeline.from(lineElements, { 
+          y: -200, 
+          rotation: 45, 
+          opacity: 0, 
+          scale: 0.5,
+          stagger: 0.3, 
+          duration: 1,
+          ease: 'back.out(2)'
+        });
+      },
+      
+      // Easy to add new text effects
+      'typewriter': (container, timeline) => {
+        const text = container.textContent;
+        container.innerHTML = '';
+        text.split('').forEach((char, i) => {
+          const span = document.createElement('span');
+          span.textContent = char === ' ' ? '\u00A0' : char;
+          span.style.opacity = '0';
+          container.appendChild(span);
+        });
+        timeline.to(container.children, {
+          opacity: 1,
+          stagger: 0.05,
+          duration: 0.1,
+          ease: 'none'
+        });
+      },
+      
+      'bounce-in': (container, timeline) => {
+        timeline.from(container, {
+          scale: 0,
+          rotation: 720,
+          opacity: 0,
+          duration: 1,
+          ease: 'bounce.out'
+        });
+      }
+    };
+
+    // 🎥 BACKGROUND EFFECTS
+    const BACKGROUND_EFFECTS = {
+      'slow-zoom': (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          scale: 1.15, 
+          filter: 'brightness(0.7) contrast(1.3)',
+          duration: duration,
+          ease: 'power1.inOut'
+        });
+      },
+      
+      'darken-desaturate': (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          scale: 0.95, 
+          filter: 'brightness(0.3) saturate(0.2) contrast(0.8)',
+          duration: duration,
+          ease: 'power1.inOut'
+        });
+      },
+      
+      'brightness-surge': (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          scale: 1.2, 
+          filter: 'brightness(1.5) saturate(1.5) contrast(1.2)',
+          duration: duration * 0.4,
+          ease: 'power2.out'
+        });
+        timeline.to(layer, { 
+          filter: 'brightness(1.1) saturate(1.3)',
+          duration: duration * 0.6,
+          ease: 'power1.inOut'
+        });
+      },
+      
+      'triumphant-zoom': (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          scale: 1.4, 
+          filter: 'brightness(1.3) saturate(1.6) contrast(1.3)',
+          duration: duration,
+          ease: 'power1.out'
+        });
+      },
+      
+      // Easy to add new background effects
+      'shake-intense': (layer, timeline, duration) => {
+        timeline.to(layer, {
+          x: 'random(-20, 20)',
+          y: 'random(-10, 10)',
+          duration: 0.1,
+          repeat: Math.floor(duration * 10),
+          yoyo: true,
+          ease: 'none'
+        });
+      },
+      
+      'rotate-zoom': (layer, timeline, duration) => {
+        timeline.to(layer, {
+          rotation: 10,
+          scale: 1.3,
+          filter: 'brightness(1.2) saturate(1.4)',
+          duration: duration,
+          ease: 'power2.inOut'
+        });
+      }
+    };
+
+    // 🎪 SCENE BUILDER CLASS
+    class CinematicScene {
+      constructor(config, index) {
+        this.config = config;
+        this.index = index;
+        this.layer = null;
+        this.textContainer = null;
+        this.effectLayer = null;
+      }
+
+      create(pinContainer) {
+        // Background layer
+        this.layer = document.createElement('div');
+        this.layer.className = 'absolute inset-0 w-full h-screen opacity-0 bg-cover bg-center transition-all duration-1000';
+        this.layer.style.backgroundImage = `url('${this.config.image}')`;
+        this.layer.style.filter = 'brightness(0.6) contrast(1.2)';
+        pinContainer.appendChild(this.layer);
+
+        // Effect layer
+        this.effectLayer = document.createElement('div');
+        this.effectLayer.className = 'absolute inset-0 w-full h-screen opacity-0 pointer-events-none';
+        pinContainer.appendChild(this.effectLayer);
+
+        // Text container
+        this.textContainer = document.createElement('div');
+        const layoutClass = TEXT_LAYOUTS[this.config.layout] || TEXT_LAYOUTS['center-focus'];
+        this.textContainer.className = `absolute z-20 opacity-0 ${layoutClass} max-w-6xl mx-auto px-4 ${this.config.container}`;
+        
+        const textElement = document.createElement('div');
+        textElement.className = this.config.style;
+        textElement.innerHTML = this.config.text;
+        
+        this.textContainer.appendChild(textElement);
+        pinContainer.appendChild(this.textContainer);
+      }
+
+      animate(masterTimeline, isLast = false) {
+        // Fade in background
+        masterTimeline.to(this.layer, { opacity: 1, duration: 1.2 });
+        masterTimeline.to(this.effectLayer, { opacity: 1, duration: 0.5 }, "<0.2");
+        
+        // Dramatic pause
+        masterTimeline.to({}, { duration: 0.5 });
+        
+        // Show text with animation
+        masterTimeline.to(this.textContainer, { opacity: 1, duration: 0.3 });
+        if (TEXT_EFFECTS[this.config.textEffect]) {
+          TEXT_EFFECTS[this.config.textEffect](this.textContainer, masterTimeline);
+        }
+
+        // Hold for effect
+        masterTimeline.to({}, { duration: 1.2 });
+
+        // Apply background effect
+        if (BACKGROUND_EFFECTS[this.config.backgroundEffect]) {
+          BACKGROUND_EFFECTS[this.config.backgroundEffect](this.layer, masterTimeline, this.config.duration);
+        }
+
+        // Fade out (except last scene)
+        if (!isLast) {
+          masterTimeline.to(this.layer, { opacity: 0, duration: 1.5 });
+          masterTimeline.to(this.effectLayer, { opacity: 0, duration: 1.5 }, "<");
+          masterTimeline.to(this.textContainer, { opacity: 0, duration: 1.2 }, "<0.3");
+        }
+      }
+    }
+
+    // 🎬 STORY DIRECTOR
+    class StoryDirector {
+      constructor(scenes) {
+        this.scenes = scenes.map((scene, index) => new CinematicScene(scene, index));
+        this.pinContainer = document.getElementById('pin-container');
+        this.masterTimeline = null;
+      }
+
+      createScenes() {
+        this.scenes.forEach(scene => scene.create(this.pinContainer));
+      }
+
+      playStory() {
+        this.masterTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: this.pinContainer,
+            pin: true,
+            scrub: 1,
+            end: "+=15000" // Reduced from 20000
+          }
+        });
+
+        this.scenes.forEach((scene, index) => {
+          const isLast = index === this.scenes.length - 1;
+          scene.animate(this.masterTimeline, isLast);
+        });
+
+        // Final fadeout
+        const lastScene = this.scenes[this.scenes.length - 1];
+        this.masterTimeline.to(lastScene.layer, { opacity: 0, duration: 2 });
+        this.masterTimeline.to(lastScene.effectLayer, { opacity: 0, duration: 2 }, "<");
+        this.masterTimeline.to(lastScene.textContainer, { opacity: 0, duration: 2 }, "<");
+      }
+
+      // Method to add new scenes dynamically
+      addScene(sceneConfig, position = -1) {
+        const newScene = new CinematicScene(sceneConfig, position);
+        if (position === -1) {
+          this.scenes.push(newScene);
+        } else {
+          this.scenes.splice(position, 0, newScene);
+        }
+        newScene.create(this.pinContainer);
+        this.playStory(); // Restart with new scene
+      }
+
+      removeScene(id) {
+        const sceneIndex = this.scenes.findIndex(scene => scene.config.id === id);
+        if (sceneIndex !== -1 && !this.scenes[sceneIndex].config.required) {
+          this.scenes.splice(sceneIndex, 1);
+          this.playStory(); // Restart without scene
+        }
+      }
+    }
+
+    // 🎭 INITIALIZE THE STORY
+    const director = new StoryDirector(STORY_SCENES);
+    director.createScenes();
+    director.playStory();
+
+    // 🎉 CTA SECTION ANIMATION
+    const ctaTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: document.getElementById('cta-section'),
+        start: "top 80%",
+        toggleActions: "play none none none",
+      }
+    });
+
+    ctaTl.from('#cta-section .text-center', { 
+      opacity: 0, 
+      scale: 0.7, 
+      y: 100, 
+      duration: 1.5,
+      ease: 'power2.out'
+    });
+    
+    ctaTl.call(() => {
+      const section = document.getElementById('cta-section');
+      if (!section.dataset.confettiLaunched) {
+        launchConfetti();
+        section.dataset.confettiLaunched = "true";
+      }
+    }, null, ">-0.8");
+
+    // 🎊 CONFETTI SYSTEM
+    function launchConfetti() {
+      const container = document.getElementById('confetti-container');
+      if (!container) return;
+      
+      const colors = ['#10B981', '#06B6D4', '#8B5CF6', '#F59E0B', '#EF4444', '#FFFFFF'];
+      const shapes = ['✨', '🎉', '🚀', '⭐', '💫', '🌟'];
+      
+      for (let i = 0; i < 200; i++) { // Reduced from 300
+        const confetti = document.createElement('div');
+        confetti.className = 'absolute text-xl opacity-0 pointer-events-none';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = `-10%`;
+        confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.innerHTML = shapes[Math.floor(Math.random() * shapes.length)];
+        container.appendChild(confetti);
+
+        gsap.to(confetti, {
+          y: '120vh', 
+          x: `random(-300, 300)`, 
+          rotation: `random(360, 1080)`, 
+          scale: `random(0.5, 2)`,
+          opacity: 1, 
+          duration: `random(3, 6)`, 
+          delay: Math.random() * 3,
+          ease: 'power1.out',
+          onComplete: () => confetti.remove()
+        });
+      }
+    }
+
+    // 🎯 CTA BUTTON INTERACTION
+    document.getElementById('cta-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const ripple = document.createElement('div');
+      ripple.className = 'absolute inset-0 bg-white/20 rounded-full transform scale-0';
+      this.appendChild(ripple);
+      
+      gsap.to(ripple, {
+        scale: 3,
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        onComplete: () => ripple.remove()
+      });
+      
+      gsap.timeline()
+        .to(this, { scale: 0.95, duration: 0.1 })
+        .to(this, { scale: 1.05, duration: 0.2, ease: 'back.out(3)' })
+        .to(this, { scale: 1, duration: 0.1 });
+      
+      console.log('🚀 Starting the habit transformation journey!');
+      setTimeout(() => launchConfetti(), 200);
+    });
+
+    // 🔧 PERFORMANCE OPTIMIZATION
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        gsap.globalTimeline.pause();
+      } else {
+        gsap.globalTimeline.resume();
+      }
+    });
+
+    // 🎬 READY STATE
+    window.addEventListener('load', () => {
+      console.log('🎬 Streamlined cinematic experience ready!');
+    });
+
+    // 🧪 EXAMPLE: How to add a new scene dynamically
+    /*
+    const newScene = {
+      id: 'motivation',
+      text: `<span class="gradient-text-fire">IGNITE</span><br/>your potential`,
+      layout: 'top-right',
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop',
+      style: 'font-inter text-white text-4xl md:text-6xl font-black text-shadow-fire',
+      container: 'bg-orange-500/30 backdrop-blur-intense rounded-3xl p-12 border-2 border-orange-400/50',
+      textEffect: 'bounce-in',
+      backgroundEffect: 'rotate-zoom',
+      duration: 2.5
+    };
+    // director.addScene(newScene, 2); // Insert at position 2
+    */
+  </script>
+</body>
+</html>

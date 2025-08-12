@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hibo – The Habit Odyssey (Tailwind Dynamic)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body class="bg-black text-white overflow-x-hidden">
+
+  <div id="pin-container" class="relative w-full h-screen overflow-hidden"></div>
+
+  <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#0F0F23] via-[#1A1A2E] to-[#16213E]">
+    <h2 class="text-4xl md:text-6xl font-bold mb-4 text-center">Start Your Journey</h2>
+    <p class="max-w-xl text-center mb-6">Transform your life through the power of small, consistent habits. Every expert was once a beginner.</p>
+    <a href="#" id="cta-button" class="px-6 py-3 text-lg font-bold text-black bg-yellow-400 rounded-full hover:scale-105 transition">Begin Your Transformation 🚀</a>
+    <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
+  </section>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Animation Presets
+    const textEffects = {
+      fadeUp: { y: 60, opacity: 0, stagger: 0.03, ease: "power2.out" },
+      scaleIn: { scale: 0.5, opacity: 0, stagger: 0.04, ease: "back.out(1.7)" },
+      fadeIn: { opacity: 0, stagger: 0.05, ease: "power1.inOut" },
+      intenseZoom: { scale: 0.2, opacity: 0, stagger: 0.02, ease: "power4.out" }
+    };
+
+    // Story Configuration
+    const storyConfig = {
+      scenes: [
+        { 
+          text: "This is Hibo.", 
+          image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop", 
+          effect: "fadeUp",
+          textStyle: { size: "text-5xl md:text-7xl", color: "text-white", position: "items-center", width: "max-w-3xl" }
+        },
+        { 
+          text: "A burst of motivation.", 
+          image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop", 
+          effect: "scaleIn",
+          textStyle: { size: "text-4xl md:text-6xl", color: "text-yellow-300", position: "items-start", width: "max-w-2xl" }
+        },
+        { 
+          text: "Until he couldn't anymore.", 
+          image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop", 
+          effect: "intenseZoom",
+          textStyle: { size: "text-5xl md:text-7xl", color: "text-red-500", position: "items-end", width: "max-w-2xl" }
+        },
+        { 
+          text: "He found the secret.", 
+          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop", 
+          effect: "fadeIn",
+          textStyle: { size: "text-4xl md:text-6xl", color: "text-green-400", position: "items-center", width: "max-w-xl" }
+        }
+      ]
+    };
+
+    const pinContainer = document.getElementById('pin-container');
+    const ctaSection = document.getElementById('cta-section');
+
+    const layers = [];
+    const textContainers = [];
+
+    // Build scenes dynamically
+    storyConfig.scenes.forEach(scene => {
+      const layer = document.createElement('div');
+      layer.className = 'absolute inset-0 opacity-0 bg-cover bg-center scale-100';
+      layer.style.backgroundImage = `url('${scene.image}')`;
+      pinContainer.appendChild(layer);
+      layers.push(layer);
+
+      const textContainer = document.createElement('div');
+      textContainer.className = `absolute inset-0 flex justify-center ${scene.textStyle.position} text-center font-bold ${scene.textStyle.size} ${scene.textStyle.color} px-4 ${scene.textStyle.width} opacity-0 drop-shadow-lg`;
+      textContainer.innerHTML = scene.text.split("").map(char => `<span class="inline-block">${char === ' ' ? '&nbsp;' : char}</span>`).join("");
+      pinContainer.appendChild(textContainer);
+      textContainers.push({ el: textContainer, effect: scene.effect });
+    });
+
+    // Master timeline
+    const masterTl = gsap.timeline({
+      scrollTrigger: { trigger: pinContainer, pin: true, scrub: 1, end: "+=12000" }
+    });
+
+    textContainers.forEach((tc, index) => {
+      const chars = tc.el.querySelectorAll('span');
+      const effect = textEffects[tc.effect] || textEffects.fadeUp;
+
+      masterTl.to(layers[index], { opacity: 1, duration: 1 });
+      masterTl.to(tc.el, { opacity: 1, duration: 0.1 }, "<");
+      masterTl.from(chars, effect, "<");
+
+      masterTl.to({}, { duration: 0.5 });
+      masterTl.to(layers[index], { scale: 1.2, duration: 2 });
+
+      if (index < textContainers.length - 1) {
+        masterTl.to(layers[index], { opacity: 0, duration: 1 });
+        masterTl.to(tc.el, { opacity: 0, duration: 1 }, "<");
+      }
+    });
+
+    // Fade out last scene before CTA
+    masterTl.to(layers[layers.length - 1], { opacity: 0, duration: 1 });
+    masterTl.to(textContainers[textContainers.length - 1].el, { opacity: 0, duration: 1 }, "<");
+
+    // CTA animations
+    const ctaTl = gsap.timeline({
+      scrollTrigger: { trigger: ctaSection, start: "top 80%", toggleActions: "play none none none" }
+    });
+
+    ctaTl.from(ctaSection, { opacity: 0, scale: 0.9, duration: 1 });
+    ctaTl.call(() => {
+      if (!ctaSection.dataset.confettiLaunched) {
+        launchConfetti();
+        ctaSection.dataset.confettiLaunched = "true";
+      }
+    }, null, ">-0.5");
+
+    function launchConfetti() {
+      const container = document.getElementById('confetti-container');
+      const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4', '#FFFFFF'];
+      for (let i = 0; i < 150; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('absolute', 'w-2', 'h-3', 'opacity-0');
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = `-20%`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        container.appendChild(confetti);
+        gsap.to(confetti, {
+          y: '120vh', x: `random(-200, 200)`, rotation: `random(360, 720)`, scale: `random(0.5, 1.5)`,
+          opacity: 1, duration: `random(3, 6)`, delay: Math.random() * 2,
+          onComplete: () => confetti.remove()
+        });
+      }
+    }
+  </script>
+</body>
+</html>
