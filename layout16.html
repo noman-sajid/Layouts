@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hibo – The Habit Odyssey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'poppins': ['Poppins', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .text-shadow-strong { text-shadow: 0 4px 15px rgba(0,0,0,0.7); }
+    .backdrop-blur-strong { backdrop-filter: blur(8px); }
+    .gradient-text {
+      background: linear-gradient(135deg, #FFD700, #FF6347);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+<body class="font-poppins bg-black text-white overflow-x-hidden">
+
+  <div id="pin-container" class="w-full h-screen relative overflow-hidden">
+    <!-- Sections will be dynamically created here -->
+  </div>
+ 
+  <section id="cta-section" class="relative w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
+    <div class="text-center px-4 max-w-4xl mx-auto">
+      <h2 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 gradient-text animate-pulse-slow">
+        Start Your Journey
+      </h2>
+      <p class="text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto mb-8 text-gray-200 leading-relaxed">
+        Transform your life through the power of small, consistent habits. Every expert was once a beginner.
+      </p>
+      <a href="#" id="cta-button" 
+         class="inline-block px-8 py-4 text-lg md:text-xl font-bold text-black bg-yellow-400 rounded-full 
+                hover:bg-yellow-300 hover:scale-105 transition-all duration-300 shadow-2xl 
+                hover:shadow-yellow-400/25">
+        Begin Your Transformation 🚀
+      </a>
+    </div>
+    <div id="confetti-container" class="absolute inset-0 overflow-hidden pointer-events-none z-50"></div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+ 
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Enhanced story configuration with independent section styles
+    const storyConfig = {
+      scenes: [
+        { 
+          text: "This is Hibo.", 
+          image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop",
+          textStyle: "text-white text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-strong",
+          containerStyle: "bg-black/30 backdrop-blur-strong rounded-2xl p-8",
+          textAnimation: "slideUp",
+          backgroundEffect: "zoom",
+          duration: 2
+        },
+        { 
+          text: "A burst of motivation.", 
+          image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop",
+          textStyle: "text-yellow-300 text-3xl md:text-5xl lg:text-7xl font-bold text-shadow-strong",
+          containerStyle: "bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-strong rounded-3xl p-10 border border-yellow-400/30",
+          textAnimation: "bounce",
+          backgroundEffect: "pan",
+          duration: 2.5
+        },
+        { 
+          text: "He worked harder and harder.", 
+          image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop",
+          textStyle: "text-red-400 text-3xl md:text-5xl lg:text-7xl font-extrabold text-shadow-strong",
+          containerStyle: "bg-red-900/40 backdrop-blur-strong rounded-xl p-8 border-l-4 border-red-500",
+          textAnimation: "typewriter",
+          backgroundEffect: "shake",
+          duration: 3
+        },
+        { 
+          text: "Until he couldn't anymore.", 
+          image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop",
+          textStyle: "text-gray-300 text-2xl md:text-4xl lg:text-6xl font-medium text-shadow-strong opacity-80",
+          containerStyle: "bg-gray-900/50 backdrop-blur-strong rounded-lg p-6",
+          textAnimation: "fade",
+          backgroundEffect: "darken",
+          duration: 2
+        },
+        { 
+          text: "He found the secret.", 
+          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop",
+          textStyle: "text-blue-300 text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-strong",
+          containerStyle: "bg-gradient-to-br from-blue-500/30 to-purple-600/30 backdrop-blur-strong rounded-full p-12",
+          textAnimation: "spiral",
+          backgroundEffect: "glow",
+          duration: 2.5
+        },
+        { 
+          text: "Start your journey.", 
+          image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop",
+          textStyle: "gradient-text text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-strong",
+          containerStyle: "bg-gradient-to-r from-yellow-400/20 to-pink-500/20 backdrop-blur-strong rounded-2xl p-10 animate-float",
+          textAnimation: "cascade",
+          backgroundEffect: "pulse",
+          duration: 3
+        }
+      ]
+    };
+
+    const pinContainer = document.getElementById('pin-container');
+    const ctaSection = document.getElementById('cta-section');
+
+    const layers = [];
+    const textContainers = [];
+
+    // Create sections dynamically
+    storyConfig.scenes.forEach((scene, index) => {
+        // Create background layer
+        const layer = document.createElement('div');
+        layer.className = 'absolute inset-0 w-full h-screen opacity-0 bg-cover bg-center transition-all duration-1000';
+        layer.style.backgroundImage = `url('${scene.image}')`;
+        layer.style.filter = 'brightness(0.7)';
+        pinContainer.appendChild(layer);
+        layers.push(layer);
+
+        // Create text container with custom styling
+        const textContainer = document.createElement('div');
+        textContainer.className = `absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 text-center max-w-5xl mx-auto px-4 opacity-0 ${scene.containerStyle}`;
+        
+        const textElement = document.createElement('div');
+        textElement.className = scene.textStyle;
+        textElement.innerHTML = scene.text.split("").map(char => 
+            `<span class="inline-block">${char === ' ' ? '&nbsp;' : char}</span>`
+        ).join("");
+        
+        textContainer.appendChild(textElement);
+        pinContainer.appendChild(textContainer);
+        textContainers.push(textContainer);
+    });
+
+    // Animation functions for different text effects
+    const textAnimations = {
+      slideUp: (chars, timeline) => {
+        timeline.from(chars, { y: 60, opacity: 0, stagger: 0.03, ease: 'power2.out' });
+      },
+      bounce: (chars, timeline) => {
+        timeline.from(chars, { scale: 0.5, opacity: 0, stagger: 0.04, ease: 'back.out(1.7)' });
+      },
+      typewriter: (chars, timeline) => {
+        timeline.from(chars, { opacity: 0, stagger: 0.05, ease: 'power1.inOut' });
+      },
+      fade: (chars, timeline) => {
+        timeline.from(chars, { opacity: 0, stagger: 0.02, ease: 'power1.inOut' });
+      },
+      spiral: (chars, timeline) => {
+        timeline.from(chars, { 
+          rotation: 360, 
+          scale: 0, 
+          opacity: 0, 
+          stagger: 0.03, 
+          ease: 'power2.out',
+          transformOrigin: "center center"
+        });
+      },
+      cascade: (chars, timeline) => {
+        timeline.from(chars, { 
+          y: -100, 
+          rotation: 180, 
+          opacity: 0, 
+          stagger: 0.02, 
+          ease: 'bounce.out' 
+        });
+      }
+    };
+
+    // Background effect functions
+    const backgroundEffects = {
+      zoom: (layer, timeline, duration) => {
+        timeline.to(layer, { scale: 1.2, duration: duration });
+      },
+      pan: (layer, timeline, duration) => {
+        timeline.to(layer, { x: '-5%', scale: 1.1, duration: duration });
+      },
+      shake: (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          x: 'random(-10, 10)', 
+          y: 'random(-5, 5)', 
+          scale: 1.05, 
+          duration: duration,
+          ease: 'power1.inOut'
+        });
+      },
+      darken: (layer, timeline, duration) => {
+        timeline.to(layer, { filter: 'brightness(0.4)', duration: duration });
+      },
+      glow: (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          filter: 'brightness(1.2) saturate(1.3)', 
+          scale: 1.1, 
+          duration: duration 
+        });
+      },
+      pulse: (layer, timeline, duration) => {
+        timeline.to(layer, { 
+          scale: 1.05, 
+          filter: 'brightness(1.1)', 
+          duration: duration,
+          ease: 'sine.inOut',
+          yoyo: true,
+          repeat: 1
+        });
+      }
+    };
+
+    // Create master timeline
+    const masterTl = gsap.timeline({
+        scrollTrigger: {
+            trigger: pinContainer,
+            pin: true,
+            scrub: 1,
+            end: "+=15000"
+        }
+    });
+
+    // Animate each scene with custom effects
+    storyConfig.scenes.forEach((scene, index) => {
+        const layer = layers[index];
+        const textContainer = textContainers[index];
+        const chars = textContainer.querySelectorAll('span');
+
+        // Fade in layer and text container
+        masterTl.to(layer, { opacity: 1, duration: 1 });
+        masterTl.to(textContainer, { opacity: 1, duration: 0.2 }, "<0.2");
+       
+        // Apply custom text animation
+        if (textAnimations[scene.textAnimation]) {
+            textAnimations[scene.textAnimation](chars, masterTl);
+        } else {
+            textAnimations.slideUp(chars, masterTl); // Default animation
+        }
+
+        // Hold scene
+        masterTl.to({}, { duration: 0.8 });
+
+        // Apply custom background effect
+        if (backgroundEffects[scene.backgroundEffect]) {
+            backgroundEffects[scene.backgroundEffect](layer, masterTl, scene.duration);
+        } else {
+            backgroundEffects.zoom(layer, masterTl, scene.duration); // Default effect
+        }
+
+        // Fade out (except for last scene)
+        if (index < storyConfig.scenes.length - 1) {
+            masterTl.to(layer, { opacity: 0, duration: 1 });
+            masterTl.to(textContainer, { opacity: 0, duration: 1 }, "<");
+        }
+    });
+   
+    // Fade out final scene
+    masterTl.to(layers[layers.length - 1], { opacity: 0, duration: 1.5 });
+    masterTl.to(textContainers[textContainers.length - 1], { opacity: 0, duration: 1.5 }, "<");
+
+    // Enhanced CTA Section Animation
+    const ctaTl = gsap.timeline({
+        scrollTrigger: {
+            trigger: ctaSection,
+            start: "top 80%",
+            toggleActions: "play none none none",
+        }
+    });
+
+    ctaTl.from(ctaSection.children[0], { 
+        opacity: 0, 
+        scale: 0.8, 
+        y: 50, 
+        duration: 1.2,
+        ease: 'power2.out'
+    });
+    
+    ctaTl.call(() => {
+        if (!ctaSection.dataset.confettiLaunched) {
+            launchConfetti();
+            ctaSection.dataset.confettiLaunched = "true";
+        }
+    }, null, ">-0.5");
+
+    // Enhanced confetti function
+    function launchConfetti() {
+        const container = document.getElementById('confetti-container');
+        if (!container) return;
+        
+        const colors = ['#FFD700', '#FF6347', '#00BFFF', '#32CD32', '#FF69B4', '#FFFFFF', '#8A2BE2'];
+        const shapes = ['●', '▲', '■', '♦', '★'];
+        
+        for (let i = 0; i < 200; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'absolute text-xl opacity-0';
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.top = `-5%`;
+            confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+            confetti.innerHTML = shapes[Math.floor(Math.random() * shapes.length)];
+            container.appendChild(confetti);
+
+            gsap.to(confetti, {
+                y: '110vh', 
+                x: `random(-300, 300)`, 
+                rotation: `random(360, 1080)`, 
+                scale: `random(0.5, 2)`,
+                opacity: 1, 
+                duration: `random(3, 7)`, 
+                delay: Math.random() * 3,
+                ease: 'power1.out',
+                onComplete: () => confetti.remove()
+            });
+        }
+    }
+
+    // Add click event for CTA button
+    document.getElementById('cta-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        // Add your navigation logic here
+        console.log('Starting habit building journey!');
+        
+        // Optional: Add a success animation
+        gsap.to(this, {
+            scale: 1.1,
+            duration: 0.1,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power2.inOut'
+        });
+    });
+  </script>
+</body>
+</html>
