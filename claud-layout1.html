@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hibo — Enhanced Cinematic Experience</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root { 
+      --bg: #000; 
+      --accent: #FFD700; 
+      --accent2: #FF6B6B;
+      --accent3: #4ECDC4;
+    }
+    html,body { 
+      height:100%; margin:0; background:var(--bg); 
+      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
+      color:#fff; overflow-x: hidden;
+    }
+
+    #pin-container { 
+      width:100%; height:100vh; position:relative; overflow:hidden;
+    }
+
+    .layer {
+      position:absolute; inset:0;
+      background-size:cover; background-position:center;
+      filter: brightness(0.82) contrast(1.1) saturate(1.2);
+      opacity:0;
+      transform-origin:center center;
+      will-change: transform, opacity, background-position;
+    }
+
+    /* Animated background patterns */
+    .layer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.02) 50%, transparent 70%);
+      opacity: 0;
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: translateX(-100%); opacity: 0; }
+      50% { transform: translateX(100%); opacity: 1; }
+    }
+
+    .dark-overlay {
+      position:absolute; inset:0; 
+      background: radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.4) 100%);
+      opacity:0; pointer-events:none;
+    }
+
+    .text-container {
+      position:absolute;
+      z-index: 60;
+      font-weight:700;
+      font-size: clamp(2rem, 5vw, 4rem);
+      text-align:center;
+      color:white;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.7), 0 0 30px rgba(255,215,0,0.3);
+      opacity:0;
+      pointer-events:none;
+      transform-origin:center center;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 0 10px rgba(255,215,0,0.2));
+    }
+    .text-container .char { 
+      display:inline-block; 
+      transition: color 0.3s ease;
+    }
+
+    /* Dynamic gradient text effect */
+    .gradient-text {
+      background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4, #FFD700);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .subtitle {
+      position:absolute;
+      z-index: 60;
+      bottom:8%;
+      left:50%;
+      transform: translateX(-50%);
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: .5rem 1rem;
+      border-radius: 20px;
+      opacity:0;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+      pointer-events:none;
+      white-space: nowrap;
+    }
+
+    /* Enhanced cinematic overlays */
+    .film-grain {
+      position:fixed; inset:0; z-index:90;
+      pointer-events:none;
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 50px 50px, 30px 30px;
+      opacity: 0.08;
+      animation: grainMove 0.5s steps(8) infinite;
+    }
+
+    @keyframes grainMove {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(1px, -1px); }
+      75% { transform: translate(-1px, -1px); }
+      100% { transform: translate(1px, 1px); }
+    }
+
+    .vignette {
+      position:fixed; inset:0; z-index:89;
+      pointer-events:none;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%);
+    }
+
+    /* Floating particles */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255,215,0,0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 70;
+    }
+
+    #fade-overlay { 
+      position:fixed; inset:0; background:#000; z-index:95; pointer-events:none; opacity:0;
+      background: radial-gradient(circle, #000 0%, #111 100%);
+    }
+
+    #scroll-indicator { 
+      position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:80; 
+      cursor:pointer; opacity:.95;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 50%;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+    #scroll-indicator:hover {
+      background: rgba(255,215,0,0.2);
+      transform: translateX(-50%) scale(1.1);
+    }
+    #scroll-indicator svg { 
+      width:24px; height:24px; 
+      animation: bounce 1.4s infinite; 
+      color:#fff; 
+      filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
+    }
+    @keyframes bounce { 
+      0%,100%{ transform: translateY(0) } 
+      50%{ transform: translateY(-8px) } 
+    }
+
+    /* Enhanced CTA section */
+    #cta-section {
+      position:relative;
+      width:100%;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      background: linear-gradient(135deg, #0F0F23, #1A1A2E, #16213E);
+      z-index:10;
+      overflow: hidden;
+    }
+
+    #cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent, rgba(255,215,0,0.05), transparent);
+      animation: ctaShimmer 6s ease-in-out infinite;
+    }
+
+    @keyframes ctaShimmer {
+      0%, 100% { transform: translateX(-100%) rotate(45deg); }
+      50% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    #cta-button { 
+      padding:1.2rem 2.5rem; 
+      border-radius:50px; 
+      font-weight:700; 
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#000; 
+      text-decoration:none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    #cta-button::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent2), var(--accent3), var(--accent));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    #cta-button:hover::before {
+      opacity: 1;
+    }
+
+    #cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,215,0,0.3);
+    }
+
+    #confetti-canvas { position:absolute; inset:0; z-index:9999; pointer-events:none; }
+
+    /* Progress indicator */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+      z-index: 100;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+
+    /* Scene counter */
+    #scene-counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div id="progress-bar"></div>
+
+  <!-- Scene counter -->
+  <div id="scene-counter">
+    <span id="current-scene">1</span> / <span id="total-scenes">6</span>
+  </div>
+
+  <!-- Enhanced cinematic overlays -->
+  <div class="film-grain"></div>
+  <div class="vignette"></div>
+  <div id="fade-overlay"></div>
+
+  <!-- Floating particles container -->
+  <div id="particles-container"></div>
+
+  <div id="pin-container">
+    <div id="scroll-indicator" title="Begin the journey">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+    </div>
+  </div>
+
+  <section id="cta-section">
+    <h2 style="font-size:clamp(2.5rem,6vw,5rem); margin-bottom:1rem; text-align:center; font-weight:900; background: linear-gradient(45deg, #FFD700, #FF6B6B); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Start Your Journey</h2>
+    <p style="max-width:680px; text-align:center; margin-bottom:2rem; font-size: 1.2rem; opacity: 0.9;">Transform your life through the power of small, consistent habits. Every expert was once a beginner.</p>
+    <a id="cta-button" href="#">Begin Your Transformation ⚡</a>
+    <canvas id="confetti-canvas"></canvas>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    ////////////////////////////////
+    // === ENHANCED EFFECT LIBRARIES ===
+    ////////////////////////////////
+    const textEffects = {
+      slideUp: (chars, container, tlRef) => {
+        return gsap.from(chars, { y: 60, opacity: 0, stagger: 0.03, ease: 'power2.out' });
+      },
+
+      scaleIn: (chars, container, tlRef) => {
+        return gsap.from(chars, { scale: 0.5, opacity: 0, stagger: 0.04, ease: 'back.out(1.7)' });
+      },
+
+      fadeIn: (chars, container, tlRef) => {
+        return gsap.from(chars, { opacity: 0, stagger: 0.05, ease: 'power1.inOut' });
+      },
+
+      // NEW: Glitch effect
+      glitchIn: (chars, container, tlRef) => {
+        const tl = gsap.timeline();
+        tl.set(chars, { opacity: 0, x: 0 });
+        tl.to(chars, { 
+          opacity: 1, 
+          duration: 0.1, 
+          stagger: 0.02,
+          ease: 'power2.out'
+        });
+        // Add glitch distortion
+        tl.to(chars, { 
+          x: () => Math.random() * 10 - 5,
+          duration: 0.05,
+          stagger: 0.01,
+          repeat: 3,
+          yoyo: true
+        }, "<");
+        tl.to(chars, { x: 0, duration: 0.2, ease: 'power2.out' });
+        return tl;
+      },
+
+      // NEW: Typewriter effect
+      typewriter: (chars, container, tlRef) => {
+        const tl = gsap.timeline();
+        tl.set(chars, { opacity: 0 });
+        tl.to(chars, { 
+          opacity: 1, 
+          duration: 0.05, 
+          stagger: 0.08,
+          ease: 'none'
+        });
+        // Add cursor blink effect
+        const cursor = document.createElement('span');
+        cursor.textContent = '|';
+        cursor.style.animation = 'blink 1s infinite';
+        container.appendChild(cursor);
+        tl.to(cursor, { opacity: 0, duration: 0.3, delay: 1 });
+        return tl;
+      },
+
+      // NEW: Explosive entrance
+      explode: (chars, container, tlRef) => {
+        const tl = gsap.timeline();
+        tl.set(chars, { 
+          opacity: 0, 
+          scale: 0.3,
+          x: () => Math.random() * 200 - 100,
+          y: () => Math.random() * 200 - 100,
+          rotation: () => Math.random() * 360
+        });
+        tl.to(chars, { 
+          opacity: 1, 
+          scale: 1,
+          x: 0,
+          y: 0,
+          rotation: 0,
+          duration: 0.6, 
+          stagger: 0.02,
+          ease: 'back.out(2)'
+        });
+        return tl;
+      },
+
+      subtitle: (chars, container, tlRef) => {
+        return gsap.fromTo(container, { y: 20, opacity: 0 }, { y:0, opacity:1, duration: 0.8, ease: 'power2.out' });
+      },
+
+      tripleBounceText: (chars, container, tlRef, opts = {}) => {
+        const duration = opts.duration || 3;
+        // Add gradient text class for extra visual impact
+        container.classList.add('gradient-text');
+        gsap.set(container, { xPercent: -50, yPercent: -50, top: "50%", left: "50%" });
+        const tl = gsap.timeline();
+        tl.set(container, { opacity: 1, scale: 1 }, 0);
+        tl.to({}, { duration: duration/3 });
+        tl.set(container, { scale: 2.2 }, ">0");
+        tl.to({}, { duration: duration/3 });
+        tl.set(container, { scale: 3.4 }, ">0");
+        tl.to({}, { duration: duration/3 });
+        tl.set(container, { scale: 4.5 }, ">0");
+        return tl;
+      }
+    };
+
+    const imageEffects = {
+      fadeIn: (layer, tlRef, opts = {}) => {
+        return gsap.fromTo(layer, { opacity: 0 }, { opacity: 1, duration: opts.duration || 1, ease: 'power1.out' });
+      },
+
+      kenBurns: (layer, tlRef, opts = {}) => {
+        return gsap.to(layer, { scale: opts.toScale || 1.06, xPercent: (opts.xPercent||-1), duration: opts.duration || 6, ease: 'power1.inOut' });
+      },
+
+      // NEW: Parallax zoom with rotation
+      parallaxZoom: (layer, tlRef, opts = {}) => {
+        const tl = gsap.timeline();
+        tl.to(layer, { 
+          scale: opts.toScale || 1.15, 
+          rotation: opts.rotation || 2,
+          duration: opts.duration || 8, 
+          ease: 'power1.inOut' 
+        });
+        return tl;
+      },
+
+      // NEW: Pulse effect
+      pulse: (layer, tlRef, opts = {}) => {
+        return gsap.to(layer, {
+          scale: opts.toScale || 1.08,
+          duration: opts.duration || 2,
+          ease: 'power2.inOut',
+          repeat: -1,
+          yoyo: true
+        });
+      },
+
+      tripleJumpImage: (layer, tlRef, opts = {}) => {
+        const duration = opts.duration || 3;
+        const tl = gsap.timeline();
+        tl.set(layer, { scale: 1 }, 0);
+        tl.to({}, { duration: duration/3 });
+        tl.set(layer, { scale: 1.2 }, ">0");
+        tl.to({}, { duration: duration/3 });
+        tl.set(layer, { scale: 1.4 }, ">0");
+        tl.to({}, { duration: duration/3 });
+        tl.set(layer, { scale: 1.6 }, ">0");
+        return tl;
+      },
+
+      slowPan: (layer, tlRef, opts={}) => {
+        const start = opts.start || '45%';
+        const end = opts.end || '55%';
+        gsap.set(layer, { backgroundPositionX: start });
+        return gsap.to(layer, { backgroundPositionX: end, duration: opts.duration || 6, ease: 'none' });
+      },
+
+      // NEW: Dramatic entrance with multiple transforms
+      dramaticEntrance: (layer, tlRef, opts = {}) => {
+        const tl = gsap.timeline();
+        tl.set(layer, { opacity: 0, scale: 1.3, rotation: -5 });
+        tl.to(layer, { 
+          opacity: 1, 
+          scale: 1, 
+          rotation: 0,
+          duration: 1.2, 
+          ease: 'power3.out' 
+        });
+        return tl;
+      }
+    };
+
+    ////////////////////////////////
+    // === ENHANCED STORY CONFIG ===
+    ////////////////////////////////
+    const storyConfig = {
+      scenes: [
+        {
+          text: "This is Hibo.",
+          subtitle: "The beginning of something extraordinary",
+          image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1920&h=1080&fit=crop",
+          textEffects: ["typewriter"],
+          imageEffects: ["fadeIn", "parallaxZoom"],
+          overlayOpacity: 0.25,
+          position: { top: "50%", left: "50%" },
+          mood: "mysterious"
+        },
+        {
+          text: "A burst of motivation.",
+          subtitle: "Energy like lightning",
+          image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop",
+          textEffects: ["explode"],
+          imageEffects: ["dramaticEntrance", "pulse"],
+          overlayOpacity: 0.20,
+          position: { top: "25%", left: "50%" },
+          mood: "energetic"
+        },
+        {
+          text: "He worked harder and harder.",
+          subtitle: "Day after day, moment after moment",
+          image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=1080&fit=crop",
+          textEffects: ["glitchIn", "subtitle"],
+          imageEffects: ["fadeIn", "kenBurns"],
+          overlayOpacity: 0.35,
+          position: { top: "75%", left: "50%" },
+          mood: "intense"
+        },
+        {
+          text: "Again",
+          subtitle: "Relentless. Unstoppable.",
+          image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=1920&h=1080&fit=crop",
+          textEffects: ["tripleBounceText"],
+          imageEffects: ["tripleJumpImage"],
+          overlayOpacity: 0.40,
+          position: { top: "50%", left: "50%" },
+          mood: "climax"
+        },
+        {
+          text: "He found the secret.",
+          subtitle: "The power was within all along",
+          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop",
+          textEffects: ["scaleIn"],
+          imageEffects: ["fadeIn", "slowPan"],
+          overlayOpacity: 0.25,
+          position: { top: "35%", left: "75%" },
+          mood: "revelation"
+        },
+        {
+          text: "Start your journey.",
+          subtitle: "Your story begins now",
+          image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop",
+          textEffects: ["slideUp", "subtitle"],
+          imageEffects: ["fadeIn", "parallaxZoom"],
+          overlayOpacity: 0.25,
+          position: { top: "65%", left: "30%" },
+          mood: "hopeful"
+        }
+      ]
+    };
+
+    ////////////////////////////////
+    // === ENHANCED INTERACTIONS ===
+    ////////////////////////////////
+
+    // Progress tracking
+    const progressBar = document.getElementById('progress-bar');
+    const currentSceneEl = document.getElementById('current-scene');
+    const totalScenesEl = document.getElementById('total-scenes');
+    totalScenesEl.textContent = storyConfig.scenes.length;
+
+    ////////////////////////////////
+    // === DYNAMIC PARTICLES ===
+    ////////////////////////////////
+    function createParticles() {
+      const container = document.getElementById('particles-container') || document.body;
+      
+      for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        container.appendChild(particle);
+
+        gsap.to(particle, {
+          y: -window.innerHeight - 50,
+          duration: Math.random() * 10 + 5,
+          ease: 'none',
+          repeat: -1,
+          delay: Math.random() * 5
+        });
+
+        gsap.to(particle, {
+          opacity: Math.random() * 0.8 + 0.2,
+          duration: Math.random() * 2 + 1,
+          ease: 'power2.inOut',
+          repeat: -1,
+          yoyo: true
+        });
+      }
+    }
+
+    ////////////////////////////////
+    // === BUILD DOM ===
+    ////////////////////////////////
+    const pinContainer = document.getElementById('pin-container');
+    const fadeOverlay = document.getElementById('fade-overlay');
+    const layers = [];
+    const overlays = [];
+    const textContainers = [];
+    const subtitleContainers = [];
+
+    storyConfig.scenes.forEach((scene, i) => {
+      // layer
+      const layer = document.createElement('div');
+      layer.className = 'layer';
+      layer.style.backgroundImage = `url('${scene.image}')`;
+      layer.style.backgroundPosition = '50% 50%';
+      
+      // Add shimmer effect to certain scenes
+      if (scene.mood === 'revelation' || scene.mood === 'hopeful') {
+        layer.style.setProperty('--shimmer-delay', Math.random() * 2 + 's');
+      }
+      
+      pinContainer.appendChild(layer);
+      layers.push(layer);
+
+      // enhanced overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'dark-overlay';
+      overlay.style.opacity = 0;
+      pinContainer.appendChild(overlay);
+      overlays.push(overlay);
+
+      // text container
+      const textWrap = document.createElement('div');
+      textWrap.className = 'text-container';
+      textWrap.style.top = (scene.position && scene.position.top) || "50%";
+      textWrap.style.left = (scene.position && scene.position.left) || "50%";
+      textWrap.style.transform = "translate(-50%, -50%)";
+      
+      // Enhanced char splitting with data attributes for advanced effects
+      textWrap.innerHTML = scene.text.split("").map((c, idx) => 
+        `<span class="char" data-char="${idx}" style="--char-index: ${idx}">${c === " " ? "&nbsp;" : c}</span>`
+      ).join("");
+      
+      pinContainer.appendChild(textWrap);
+      textContainers.push(textWrap);
+
+      // enhanced subtitle
+      const subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = scene.subtitle || "";
+      pinContainer.appendChild(subtitle);
+      subtitleContainers.push(subtitle);
+    });
+
+    ////////////////////////////////
+    // === ENHANCED MASTER TIMELINE ===
+    ////////////////////////////////
+    const masterTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: pinContainer,
+        pin: true,
+        scrub: 1.2,
+        start: "top top",
+        end: "+=15000",
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          // Update progress bar
+          gsap.to(progressBar, { scaleX: self.progress, duration: 0.1 });
+          
+          // Update scene counter
+          const currentScene = Math.floor(self.progress * storyConfig.scenes.length) + 1;
+          currentSceneEl.textContent = Math.min(currentScene, storyConfig.scenes.length);
+        }
+      }
+    });
+
+    // Enhanced helper functions
+    function applyTextEffectByName(name, chars, container) {
+      if (!name) return null;
+      const fn = textEffects[name];
+      if (!fn) { console.warn("Missing text effect:", name); return null; }
+      return fn(chars, container, masterTl);
+    }
+
+    function applyImageEffectByName(name, layer) {
+      if (!name) return null;
+      const fn = imageEffects[name];
+      if (!fn) { console.warn("Missing image effect:", name); return null; }
+      return fn(layer, masterTl);
+    }
+
+    // Build enhanced sequence with mood-based transitions
+    storyConfig.scenes.forEach((scene, index) => {
+      const layer = layers[index];
+      const overlay = overlays[index];
+      const textWrap = textContainers[index];
+      const subtitleEl = subtitleContainers[index];
+      const chars = textWrap.querySelectorAll('.char');
+
+      // Enhanced scene transition based on mood
+      const transitionDuration = scene.mood === 'climax' ? 0.2 : 0.4;
+      masterTl.to(fadeOverlay, { opacity: 1, duration: transitionDuration });
+
+      // Scene setup with mood-based enhancements
+      masterTl.set(layer, { opacity: 1, scale: 1, clearProps: "transform" });
+      masterTl.set(overlay, { opacity: scene.overlayOpacity || 0.32 });
+      
+      // Add shimmer effect to background for certain moods
+      if (scene.mood === 'revelation') {
+        masterTl.set(layer, { filter: "brightness(0.9) contrast(1.2) saturate(1.4)" });
+      }
+
+      masterTl.to(fadeOverlay, { opacity: 0, duration: transitionDuration });
+
+      // Apply image effects
+      if (Array.isArray(scene.imageEffects)) {
+        scene.imageEffects.forEach(effectName => {
+          const imgAnim = applyImageEffectByName(effectName, layer);
+          if (imgAnim) masterTl.add(imgAnim, "<");
+        });
+      } else {
+        masterTl.to(layer, { scale: 1.02, duration: 2, ease: 'power1.out' }, "<");
+      }
+
+      // Text reveal with enhanced timing
+      masterTl.to(textWrap, { opacity: 1, duration: 0.08 }, "<");
+
+      if (Array.isArray(scene.textEffects)) {
+        scene.textEffects.forEach(effectName => {
+          const txtAnim = applyTextEffectByName(effectName, chars, textWrap);
+          if (txtAnim) masterTl.add(txtAnim, "<");
+        });
+      } else {
+        masterTl.add(textEffects.fadeIn(chars, textWrap, masterTl), "<");
+      }
+
+      // Enhanced subtitle timing
+      if (subtitleEl && subtitleEl.textContent.trim()) {
+        masterTl.to(subtitleEl, { opacity: 1, duration: 0.6, ease: 'power2.out' }, "<+0.3");
+      }
+
+      // Longer hold for dramatic effect on climax scenes
+      const holdDuration = scene.mood === 'climax' ? 1.5 : scene.mood === 'revelation' ? 1.2 : 0.9;
+      masterTl.to({}, { duration: holdDuration });
+
+      // Enhanced fade out with scene-specific timing
+      if (index < storyConfig.scenes.length - 1) {
+        const fadeOutDuration = scene.mood === 'climax' ? 1.0 : 0.6;
+        masterTl.to(subtitleEl, { opacity: 0, duration: 0.35 }, "<");
+        masterTl.to(textWrap, { opacity: 0, duration: fadeOutDuration }, "<");
+        masterTl.to([layer, overlay], { opacity: 0, duration: 0.8 }, "<+0.1");
+        masterTl.set([layer, overlay, textWrap, subtitleEl], { clearProps: "transform,opacity" });
+      }
+    });
+
+    masterTl.to(fadeOverlay, { opacity: 0, duration: 0.2 });
+
+    ////////////////////////////////
+    // === ENHANCED CTA & INTERACTIONS ===
+    ////////////////////////////////
+    const cta = document.getElementById('cta-section');
+    const ctaTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: cta, 
+        start: "top 80%", 
+        toggleActions: "play none none none"
+      }
+    });
+
+    ctaTl.from(cta.children, { 
+      opacity: 0, 
+      y: 50, 
+      stagger: 0.2, 
+      duration: 0.8,
+      ease: 'power2.out'
+    });
+    
+    ctaTl.call(() => {
+      if (!cta.dataset.confettiLaunched) {
+        fireEnhancedConfetti();
+        cta.dataset.confettiLaunched = "true";
+      }
+    }, null, ">-0.3");
+
+    // Enhanced confetti with multiple bursts
+    function fireEnhancedConfetti() {
+      const duration = 3 * 1000;
+      const end = Date.now() + duration;
+      
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      (function frame() {
+        confetti({
+          particleCount: randomInRange(3, 8),
+          angle: randomInRange(55, 125),
+          spread: randomInRange(50, 70),
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() * 0.3 + 0.1 },
+          colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#FFA500']
+        });
+        confetti({
+          particleCount: randomInRange(3, 8),
+          angle: randomInRange(55, 125),
+          spread: randomInRange(50, 70),
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() * 0.3 + 0.1 },
+          colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#FFA500']
+        });
+        
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    ////////////////////////////////
+    // === SCROLL INDICATOR ENHANCEMENTS ===
+    ////////////////////////////////
+    const scrollIndicator = document.getElementById('scroll-indicator');
+    
+    function hideScrollIndicator() {
+      gsap.to(scrollIndicator, { 
+        opacity: 0, 
+        y: 20, 
+        scale: 0.8,
+        duration: 0.8, 
+        ease: 'power2.out',
+        pointerEvents: 'none' 
+      });
+      window.removeEventListener('scroll', onFirstScroll);
+    }
+    
+    function onFirstScroll() { hideScrollIndicator(); }
+    window.addEventListener('scroll', onFirstScroll, { once: true });
+    
+    scrollIndicator.addEventListener('click', () => {
+      window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+      hideScrollIndicator();
+    });
+
+    ////////////////////////////////
+    // === ADDITIONAL ENHANCEMENTS ===
+    ////////////////////////////////
+
+    // Add CSS animation keyframes for blink cursor
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+      }
+      
+      /* Hover effects for interactive elements */
+      .text-container:hover .char {
+        color: var(--accent);
+        transition: color 0.3s ease;
+      }
+      
+      /* Enhanced responsiveness */
+      @media (max-width: 768px) {
+        .text-container {
+          font-size: clamp(1.5rem, 8vw, 3rem);
+          padding: 0 1rem;
+        }
+        .subtitle {
+          font-size: clamp(0.8rem, 4vw, 1.1rem);
+          bottom: 5%;
+        }
+        #scene-counter {
+          top: 10px;
+          right: 10px;
+          font-size: 0.8rem;
+        }
+      }
+      
+      /* Accessibility improvements */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        .film-grain {
+          animation: none;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize particles
+    createParticles();
+
+    // Add ambient sound trigger (optional - can be enabled)
+    function addAmbientSoundTrigger() {
+      // This would require actual audio files, so it's commented out
+      // but shows how you could add audio layers
+      /*
+      const audio = new Audio('path/to/ambient.mp3');
+      audio.loop = true;
+      audio.volume = 0.1;
+      
+      ScrollTrigger.create({
+        trigger: pinContainer,
+        start: "top 50%",
+        onEnter: () => audio.play(),
+        onLeave: () => audio.pause()
+      });
+      */
+    }
+
+    // Enhanced keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowDown':
+        case ' ':
+          e.preventDefault();
+          window.scrollBy({ top: window.innerHeight * 0.5, behavior: 'smooth' });
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          window.scrollBy({ top: -window.innerHeight * 0.5, behavior: 'smooth' });
+          break;
+        case 'Home':
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          break;
+        case 'End':
+          e.preventDefault();
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          break;
+      }
+    });
+
+    // Add Easter egg - click sequence for bonus content
+    let clickSequence = [];
+    const secretSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown'];
+    
+    document.addEventListener('keydown', (e) => {
+      clickSequence.push(e.key);
+      if (clickSequence.length > secretSequence.length) {
+        clickSequence.shift();
+      }
+      
+      if (JSON.stringify(clickSequence) === JSON.stringify(secretSequence)) {
+        // Easter egg activated!
+        fireEnhancedConfetti();
+        cursor.style.background = 'radial-gradient(circle, #FF6B6B, transparent)';
+        cursor.style.transform = 'scale(2)';
+        setTimeout(() => {
+          cursor.style.transform = 'scale(1)';
+        }, 500);
+        clickSequence = [];
+      }
+    });
+
+    // Performance optimization: pause animations when not in view
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Resume animations
+          gsap.globalTimeline.play();
+        } else {
+          // Pause when not visible (save battery on mobile)
+          gsap.globalTimeline.pause();
+        }
+      });
+    });
+
+    intersectionObserver.observe(pinContainer);
+
+    // Expose enhanced debugging tools
+    window.__HIBO = { 
+      textEffects, 
+      imageEffects, 
+      storyConfig, 
+      masterTl,
+      // New debugging helpers
+      jumpToScene: (sceneIndex) => {
+        const progress = sceneIndex / storyConfig.scenes.length;
+        gsap.to(window, { scrollTo: progress * masterTl.scrollTrigger.end, duration: 1 });
+      },
+      toggleDebugMode: () => {
+        document.body.style.cursor = document.body.style.cursor === 'crosshair' ? 'none' : 'crosshair';
+        console.log('Debug mode toggled');
+      }
+    };
+
+    // Initialize enhanced features
+    console.log('🎬 Enhanced Hibo loaded with', storyConfig.scenes.length, 'scenes');
+    console.log('💡 Try: __HIBO.jumpToScene(3) or __HIBO.toggleDebugMode()');
+
+  </script>
+</body>
+</html>
