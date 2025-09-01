@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Hero Section</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+
+    <!-- Hero Section Container -->
+    <div class="relative w-full h-screen flex items-center justify-center p-4 sm:p-8">
+
+        <!-- Hero Content Overlay -->
+        <div class="z-20 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+            <!-- Left Section for 3D Scene -->
+            <div class="relative w-full h-96 md:h-full flex items-center justify-center">
+                <!-- Three.js scene will render here -->
+                <div id="three-container" class="w-full h-full"></div>
+            </div>
+
+            <!-- Right Section for Text Content -->
+            <div class="bg-gray-900 bg-opacity-30 backdrop-blur-md p-6 sm:p-8 md:p-12 rounded-2xl border border-gray-700 shadow-2xl transition-all duration-300 transform hover:scale-105">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">
+                    Pioneering Digital Solutions
+                </h1>
+                <p class="text-sm sm:text-lg text-gray-300 mb-6">
+                    We fuse cutting-edge technology with creative vision to build digital experiences that are not just beautiful, but also profoundly impactful. Explore how our innovative approach can transform your brand.
+                </p>
+                <a href="#" class="inline-block px-6 py-2 sm:px-8 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
+                    Discover More
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+
+    <script>
+        function setupThreeJS() {
+            // Scene setup
+            const scene = new THREE.Scene();
+            const container = document.getElementById('three-container');
+
+            // Camera setup
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Renderer setup
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+
+            // Solar system group
+            const solarSystem = new THREE.Group();
+            scene.add(solarSystem);
+            
+            // TILT the entire system for a more dramatic effect
+            solarSystem.rotation.x = -Math.PI / 6;
+
+            // Central sphere
+            const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+            const sphereMaterial = new THREE.MeshStandardMaterial({
+                color: 0x6366f1,
+                emissive: 0x6366f1,
+                emissiveIntensity: 0.8, // Increased for a more "filled" look
+            });
+            const centralSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            solarSystem.add(centralSphere);
+
+            // Images to display
+            const imageURLs = [
+                'https://placehold.co/100x100/1e293b/a5f3fc?text=Code',
+                'https://placehold.co/100x100/1e293b/fde68a?text=Design',
+                'https://placehold.co/100x100/1e293b/c4b5fd?text=Data',
+                'https://placehold.co/100x100/1e293b/fca5a5?text=Future',
+                'https://placehold.co/100x100/1e293b/99f6e4?text=Vision'
+            ];
+            const images = [];
+            const planes = [];
+
+            // Load textures and create planes
+            const textureLoader = new THREE.TextureLoader();
+            imageURLs.forEach((url, index) => {
+                textureLoader.load(url, (texture) => {
+                    const planeGeometry = new THREE.PlaneGeometry(1.5, 1.5);
+                    const planeMaterial = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        transparent: true,
+                        side: THREE.DoubleSide
+                    });
+                    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+                    const angle = (index / imageURLs.length) * Math.PI * 2;
+                    plane.position.x = Math.cos(angle) * 3;
+                    plane.position.y = Math.sin(angle) * 3;
+                    solarSystem.add(plane);
+                    planes.push(plane);
+                });
+            });
+
+            // Animation loop
+            const animate = () => {
+                requestAnimationFrame(animate);
+
+                // Rotate the entire solar system group
+                solarSystem.rotation.y += 0.005;
+
+                // Make planes face the camera
+                planes.forEach(plane => {
+                    plane.lookAt(camera.position);
+                });
+
+                renderer.render(scene, camera);
+            };
+
+            // Periodically flip an image
+            let currentImageIndex = 0;
+            const flipInterval = setInterval(() => {
+                if (planes.length === 0) return;
+
+                // Select a random plane to flip
+                const planeToFlip = planes[Math.floor(Math.random() * planes.length)];
+                
+                // Animate the flip
+                gsap.to(planeToFlip.rotation, {
+                    y: planeToFlip.rotation.y + Math.PI, // 180 degree flip
+                    duration: 1.5,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        // After the flip, update the texture
+                        currentImageIndex = (currentImageIndex + 1) % imageURLs.length;
+                        textureLoader.load(imageURLs[currentImageIndex], (texture) => {
+                            planeToFlip.material.map = texture;
+                            planeToFlip.material.needsUpdate = true;
+                        });
+                    }
+                });
+            }, 3000); // Flip an image every 3 seconds
+
+            // Handle window resizing
+            window.addEventListener('resize', () => {
+                const width = container.offsetWidth;
+                const height = container.offsetHeight;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            });
+
+            // Start the animation on window load
+            window.onload = function() {
+                animate();
+            };
+        }
+
+        setupThreeJS();
+    </script>
+
+</body>
+</html>
