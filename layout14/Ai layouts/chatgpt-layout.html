@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mind-Blowing Hero</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body class="bg-black text-white overflow-hidden">
+  <section id="hero" class="relative h-screen w-full flex items-center justify-center">
+    <!-- Canvas for Three.js -->
+    <canvas id="bg-canvas" class="absolute inset-0"></canvas>
+
+    <!-- Overlay Content -->
+    <div class="relative z-10 text-center px-4">
+      <h1 class="text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+        Welcome to the Future
+      </h1>
+      <p class="mt-4 text-lg md:text-xl text-gray-300">
+        Cutting-edge solutions powered by imagination.
+      </p>
+      <div class="mt-8 flex justify-center gap-4">
+        <button class="px-6 py-3 rounded-full bg-white text-black font-semibold hover:scale-105 transform transition">
+          Get Started
+        </button>
+        <button class="px-6 py-3 rounded-full border border-white text-white hover:bg-white hover:text-black transition">
+          Learn More
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Three.js setup
+    const canvas = document.getElementById("bg-canvas");
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75, window.innerWidth / window.innerHeight, 0.1, 1000
+    );
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // Create particles
+    const geometry = new THREE.SphereGeometry(5, 64, 64);
+    const material = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.05,
+    });
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+    camera.position.z = 10;
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      particles.rotation.y += 0.0015;
+      particles.rotation.x += 0.0005;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Mouse interaction
+    document.addEventListener("mousemove", (e) => {
+      gsap.to(particles.rotation, {
+        x: e.clientY / window.innerHeight - 0.5,
+        y: e.clientX / window.innerWidth - 0.5,
+        duration: 1.5,
+        ease: "power2.out"
+      });
+    });
+  </script>
+</body>
+</html>
