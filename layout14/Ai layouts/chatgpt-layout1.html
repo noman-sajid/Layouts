@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Immersive Hero</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
+      font-family: sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+    .ring {
+      transform-style: preserve-3d;
+      transform: rotateY(0deg);
+      transition: transform 1s ease;
+    }
+    .item {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.5s ease, background 0.3s ease;
+      cursor: pointer;
+    }
+    .item.active {
+      background: white;
+      color: black;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <section class="h-screen flex items-center justify-between px-10">
+    <!-- Ring -->
+    <div class="w-1/2 flex justify-center relative">
+      <div id="ring" class="ring relative w-[500px] h-[500px]">
+        <div class="item" data-title="Item 1" data-desc="Description of Item 1">1</div>
+        <div class="item" data-title="Item 2" data-desc="Description of Item 2">2</div>
+        <div class="item" data-title="Item 3" data-desc="Description of Item 3">3</div>
+        <div class="item" data-title="Item 4" data-desc="Description of Item 4">4</div>
+        <div class="item" data-title="Item 5" data-desc="Description of Item 5">5</div>
+        <div class="item" data-title="Item 6" data-desc="Description of Item 6">6</div>
+      </div>
+    </div>
+
+    <!-- Text -->
+    <div class="w-1/2 pl-10">
+      <h1 id="title" class="text-5xl font-bold mb-4">Item 1</h1>
+      <p id="desc" class="text-lg text-gray-300 mb-6">Description of Item 1</p>
+      <button class="px-6 py-3 bg-white text-black rounded-full font-semibold hover:scale-105 transition">
+        Learn More
+      </button>
+    </div>
+  </section>
+
+  <script>
+    const ring = document.getElementById("ring");
+    const items = [...document.querySelectorAll(".item")];
+    const titleEl = document.getElementById("title");
+    const descEl = document.getElementById("desc");
+
+    let angle = 0;
+    const step = 360 / items.length;
+
+    function positionItems() {
+      items.forEach((item, i) => {
+        const theta = (i * step) * (Math.PI / 180);
+        const x = Math.sin(theta) * 200;
+        const z = Math.cos(theta) * 200;
+        item.style.transform = `translate(-50%, -50%) translateZ(${z}px) translateX(${x}px)`;
+      });
+    }
+
+    function highlightActive() {
+      let closest = { z: -Infinity, el: null };
+      items.forEach(item => {
+        const matrix = new WebKitCSSMatrix(window.getComputedStyle(item).transform);
+        const z = matrix.m43; // depth
+        item.classList.remove("active");
+        if (z > closest.z) closest = { z, el: item };
+      });
+      if (closest.el) {
+        closest.el.classList.add("active");
+        titleEl.textContent = closest.el.dataset.title;
+        descEl.textContent = closest.el.dataset.desc;
+      }
+    }
+
+    function rotateRing(dir) {
+      angle += dir * step;
+      ring.style.transform = `rotateY(${angle}deg)`;
+      setTimeout(highlightActive, 1000);
+    }
+
+    // Arrange items
+    positionItems();
+    highlightActive();
+
+    // Click rotation
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") rotateRing(-1);
+      if (e.key === "ArrowLeft") rotateRing(1);
+    });
+
+    // Click item
+    items.forEach((item, i) => {
+      item.addEventListener("click", () => {
+        const rotateTo = -i * step;
+        angle = rotateTo;
+        ring.style.transform = `rotateY(${angle}deg)`;
+        setTimeout(highlightActive, 1000);
+      });
+    });
+  </script>
+</body>
+</html>
